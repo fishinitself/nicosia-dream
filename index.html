@@ -230,7 +230,7 @@ html.credopen { overflow: hidden; }
   var audio = (function () {
     var ctx = null, on = false, N = {}, lastCi = -1, nextEv = 0, lastEv = '', prevG = 0, lastShot = 0;
     // chapter order: intro, midday, shadows, dusk, night, dawn
-    var BED = { stream: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0], crowd: [0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0, 0.2, 0.1, 0.15, 0, 0.12], hum: [0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0.4, 0, 0, 0.12], cic: [0, .9, .3, .12, 0, 0, 0.3, 0, 0.3, 0.15, 0.1, 0.1, 0.2, 0, 0.1, 0.2, 1], cri: [0, 0, 0, .35, .9, .3, 0, 0.15, 0, 0, 0.1, 0.4, 0.3, 0.7, 0.1, 0, 0], wind: [.15, .2, .5, .3, .3, .4, 0.55, 0.2, 0.1, 0.5, 0.55, 0.3, 0.3, 0.15, 0.3, 0.3, 0.1],
+    var BED = { stream: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0], crowd: [0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0, 0.2, 0.1, 0.15, 0, 0.12], babble: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.22, 0.1, 0.12, 0, 0.1], hum: [0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0.4, 0, 0, 0.12], cic: [0, .9, .3, .12, 0, 0, 0.3, 0, 0.3, 0.15, 0.1, 0.1, 0.2, 0, 0.1, 0.2, 1], cri: [0, 0, 0, .35, .9, .3, 0, 0.15, 0, 0, 0.1, 0.4, 0.3, 0.7, 0.1, 0, 0], wind: [.15, .2, .5, .3, .3, .4, 0.55, 0.2, 0.1, 0.5, 0.55, 0.3, 0.3, 0.15, 0.3, 0.3, 0.1],
                 city: [.5, .7, .4, .45, .35, .3, 0.12, 0.55, 0.4, 0.3, 0.22, 0.15, 0.5, 0.3, 0.25, 0.2, 0.35], fan: [.15, .3, .1, .1, .25, .05, 0, 0.3, 0, 0.1, 0.1, 0, 0.15, 0.12, 0.1, 0.18, 0.2] };
     var EV = {
       steps:     [.3, .4, .6, .4, .7, .3, 0.1, 0.2, 0.3, 0.5, 0.6, 0.15, 0.4, 0.3, 0.5, 0.2, 0.3],
@@ -274,6 +274,7 @@ html.credopen { overflow: hidden; }
       compressor:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
       siren:     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5],
       scoop:     [0, 0, 0, 0, 0, 0, 0, 0, .6, 0, 0, 0, 0, 0, 0, 0, 0],
+      cry:       [0, 0, 0, 0, 0, 0, 0, 0, .9, 0, 0, 0, 0.08, 0, 0, 0, 0],
       bell:      [0, 0, 0, .15, 0, .15, 0, 0, 0, 0.35, 0.2, 0, 0.6, 0.2, 0.5, 0.35, 0.2]
     };
     var EVN = Object.keys(EV);
@@ -472,6 +473,17 @@ html.credopen { overflow: hidden; }
         var n = Math.floor(rnd(22, 34)), pan = rnd(-0.5, 0.5);
         for (var k = 0; k < n; k++) burst(t + Math.random() * 1.3, 0.018, 'bandpass', rnd(3000, 6000), 3, rnd(0.015, 0.04), 0.001, pan, 0.35);
       },
+      cry: function (t) {                                              // a stallholder calling out: two syllables, no words
+        var pan = rnd(-0.7, 0.7), f0 = rnd(115, 175), o = ctx.createOscillator(), a1 = filt('bandpass', 700, 4), b1 = filt('bandpass', 1250, 6), g = ctx.createGain(), sum = ctx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(f0 * 1.05, t); o.frequency.linearRampToValueAtTime(f0 * 1.35, t + 0.26); o.frequency.linearRampToValueAtTime(f0 * 0.98, t + 0.55);
+        o.frequency.linearRampToValueAtTime(f0 * 1.4, t + 0.82); o.frequency.linearRampToValueAtTime(f0 * 0.72, t + 1.35);
+        a1.frequency.setValueAtTime(720, t); a1.frequency.linearRampToValueAtTime(480, t + 0.55); a1.frequency.linearRampToValueAtTime(760, t + 0.85); a1.frequency.linearRampToValueAtTime(520, t + 1.35);
+        b1.frequency.setValueAtTime(1150, t); b1.frequency.linearRampToValueAtTime(1500, t + 0.55); b1.frequency.linearRampToValueAtTime(1100, t + 0.85); b1.frequency.linearRampToValueAtTime(1350, t + 1.35);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.12); g.gain.exponentialRampToValueAtTime(0.012, t + 0.5);
+        g.gain.exponentialRampToValueAtTime(0.06, t + 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+        o.connect(a1); o.connect(b1); a1.connect(sum); b1.connect(sum); sum.connect(g); out(g, pan, 0.75); o.start(t); o.stop(t + 1.5);
+      },
       scoop: function (t) {                                            // a metal scoop dragged through the market
         var pan = rnd(-0.6, 0.6), src = noiseSrc(t), fl = filt('bandpass', 1500, 2), g = ctx.createGain();
         fl.frequency.setValueAtTime(1500, t); fl.frequency.exponentialRampToValueAtTime(3600, t + 0.5);
@@ -565,6 +577,18 @@ html.credopen { overflow: hidden; }
       // far-off market hubbub: two bands of noise with slow swell, no words
       var w1 = filt('bandpass', 700, 0.8), w2 = filt('bandpass', 1500, 1.2), wg = ctx.createGain(); wg.gain.value = 0.7;
       noiseSrc().connect(w1); noiseSrc().connect(w2); w1.connect(wg); w2.connect(wg); lfo(0.31, 0.25, wg.gain); lfo(0.07, 0.2, wg.gain); bed('crowd', wg);
+      // the babble of a market: several voices without words (a pitched buzz through moving vowel formants, switched on and off at syllable rate)
+      var bb = ctx.createGain(); bb.gain.value = 1;
+      for (var vi = 0; vi < 7; vi++) {
+        var vo = ctx.createOscillator(); vo.type = 'sawtooth'; vo.frequency.value = (vi % 3 === 0) ? rnd(95, 130) : rnd(170, 240); lfo(rnd(0.3, 0.8), 5, vo.frequency); vo.start();
+        var vf1 = filt('bandpass', rnd(520, 700), 5), vf2 = filt('bandpass', rnd(1300, 1800), 7), vg = ctx.createGain(); vg.gain.value = 0.3;
+        lfo(rnd(3, 5), 220, vf1.frequency); lfo(rnd(2.5, 4), 450, vf2.frequency); lfo(rnd(3, 5.5), 0.17, vg.gain); lfo(rnd(0.2, 0.5), 0.1, vg.gain);
+        vo.connect(vf1); vo.connect(vf2); vf1.connect(vg); vf2.connect(vg);
+        var vp = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (vp.pan) vp.pan.value = rnd(-0.8, 0.8);
+        vg.connect(vp); vp.connect(bb);
+      }
+      var sh = filt('highpass', 3500, 0.7), shg = ctx.createGain(); shg.gain.value = 0.05; noiseSrc().connect(sh); sh.connect(shg); lfo(4.1, 0.04, shg.gain); shg.connect(bb);
+      bed('babble', bb);
       // running water: two bands of noise, slowly varying
       var r1 = filt('bandpass', 1100, 0.6), r2 = filt('bandpass', 2800, 0.8), rg = ctx.createGain(); rg.gain.value = 0.6;
       noiseSrc().connect(r1); noiseSrc().connect(r2); r1.connect(rg); r2.connect(rg); lfo(0.45, 0.2, rg.gain); lfo(0.13, 0.15, rg.gain); bed('stream', rg);
@@ -579,6 +603,7 @@ html.credopen { overflow: hidden; }
       N.fan.gain.setTargetAtTime(BED.fan[ci] * 0.05, t, 2.4);
       N.stream.gain.setTargetAtTime(BED.stream[ci] * 0.045, t, 2.4);
       N.crowd.gain.setTargetAtTime(BED.crowd[ci] * 0.05, t, 2.4);
+      N.babble.gain.setTargetAtTime(BED.babble[ci] * 0.035, t, 2.4);
       N.hum.gain.setTargetAtTime(BED.hum[ci] * 0.012, t, 2.4);
     }
     function pickEvent(ci) {
