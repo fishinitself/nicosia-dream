@@ -480,8 +480,8 @@ html.credopen { overflow: hidden; }
         o.frequency.linearRampToValueAtTime(f0 * 1.4, t + 0.82); o.frequency.linearRampToValueAtTime(f0 * 0.72, t + 1.35);
         a1.frequency.setValueAtTime(720, t); a1.frequency.linearRampToValueAtTime(480, t + 0.55); a1.frequency.linearRampToValueAtTime(760, t + 0.85); a1.frequency.linearRampToValueAtTime(520, t + 1.35);
         b1.frequency.setValueAtTime(1150, t); b1.frequency.linearRampToValueAtTime(1500, t + 0.55); b1.frequency.linearRampToValueAtTime(1100, t + 0.85); b1.frequency.linearRampToValueAtTime(1350, t + 1.35);
-        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.12); g.gain.exponentialRampToValueAtTime(0.012, t + 0.5);
-        g.gain.exponentialRampToValueAtTime(0.06, t + 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.14, t + 0.12); g.gain.exponentialRampToValueAtTime(0.035, t + 0.5);
+        g.gain.exponentialRampToValueAtTime(0.16, t + 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
         o.connect(a1); o.connect(b1); a1.connect(sum); b1.connect(sum); sum.connect(g); out(g, pan, 0.75); o.start(t); o.stop(t + 1.5);
       },
       scoop: function (t) {                                            // a metal scoop dragged through the market
@@ -603,7 +603,7 @@ html.credopen { overflow: hidden; }
       N.fan.gain.setTargetAtTime(BED.fan[ci] * 0.05, t, 2.4);
       N.stream.gain.setTargetAtTime(BED.stream[ci] * 0.045, t, 2.4);
       N.crowd.gain.setTargetAtTime(BED.crowd[ci] * 0.05, t, 2.4);
-      N.babble.gain.setTargetAtTime(BED.babble[ci] * 0.035, t, 2.4);
+      N.babble.gain.setTargetAtTime(BED.babble[ci] * 0.17, t, 2.4);
       N.hum.gain.setTargetAtTime(BED.hum[ci] * 0.012, t, 2.4);
     }
     function pickEvent(ci) {
