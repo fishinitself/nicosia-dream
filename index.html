@@ -1,0 +1,799 @@
+<title>Όνειρο στη Λευκωσία</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* Layout: one fixed stage; scroll drives a sequence of beats that dissolve into each other.
+   Single dark look by choice: the page is a night. */
+:root {
+  --ink: #0b0a0c;          /* night, slight violet bias */
+  --bone: #eee4d3;         /* text, warm paper */
+  --dust: #b9ad9a;         /* secondary text */
+  --ember: #d0653c;        /* ghost channel 1: dusk terracotta */
+  --glass: #5fa7c4;        /* ghost channel 2: window-glass blue */
+  --display: "EB Garamond", "GFS Didot", "Palatino Linotype", "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--ink); color: var(--bone); }
+body { overflow-x: hidden; font-family: var(--mono); -webkit-font-smoothing: antialiased; }
+#spacer { width: 1px; }
+
+#stage { position: fixed; inset: 0; overflow: hidden; background: var(--ink); }
+.beat { position: absolute; inset: 0; visibility: hidden; opacity: 0; will-change: opacity; }
+.ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.ghost { mix-blend-mode: screen; opacity: 0; filter: hue-rotate(35deg) saturate(1.3); }
+.bgblur { filter: blur(46px) brightness(.45) saturate(1.2); transform: scale(1.25); }
+
+.frame { position: absolute; left: 50%; top: 50%; overflow: hidden; transform: translate(-50%, -50%); box-shadow: 0 30px 120px rgba(0,0,0,.65); }
+.frame .ph { inset: 0; }
+
+.slices { position: absolute; inset: 0; overflow: hidden; }
+.sl { position: absolute; left: -10%; width: 120%; overflow: hidden; will-change: transform; }
+.sl img { position: absolute; left: 0; width: 100%; object-fit: cover; }
+
+.dbl { mix-blend-mode: screen; }
+
+/* mixes */
+.mixw { position: absolute; inset: 0; --mx: 50%; --my: 50%; --mr: 80%;
+  -webkit-mask-image: radial-gradient(circle farthest-corner at var(--mx) var(--my), #000 0, rgba(0,0,0,.65) calc(var(--mr) * .4), transparent var(--mr));
+          mask-image: radial-gradient(circle farthest-corner at var(--mx) var(--my), #000 0, rgba(0,0,0,.65) calc(var(--mr) * .4), transparent var(--mr)); }
+.tri { position: absolute; inset: 0; overflow: hidden; }
+.tri .col { position: absolute; top: 0; bottom: 0; overflow: hidden; box-shadow: 1px 0 0 var(--ink); }
+.tri .col img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+
+/* text */
+.txt { position: absolute; max-width: min(44rem, calc(100% - var(--gutter-l) - var(--gutter-r))); will-change: transform; z-index: 5; }
+.txt .el { font-family: var(--display); font-style: italic; font-weight: 400; font-size: clamp(30px, 4.8vw, 76px); line-height: 1.08; margin: 0; text-wrap: balance; text-shadow: 0 0 6px rgba(0,0,0,.45), 0 2px 40px rgba(0,0,0,.85); }
+.txt .el .w { display: inline-block; margin-right: .26em; will-change: transform; }
+.txt.q .el { font-size: clamp(24px, 3.5vw, 54px); line-height: 1.16; }
+.txt .src { margin: 1.1em 0 0; font-family: var(--display); font-size: clamp(15px, 1.5vw, 20px); letter-spacing: .1em; color: var(--dust); text-shadow: 0 1px 14px rgba(0,0,0,.9); }
+.txt .tr { margin: 1.2em 0 0; font-size: clamp(11px, 1.05vw, 14px); letter-spacing: .14em; text-transform: uppercase; color: var(--bone); text-shadow: 0 0 6px rgba(0,0,0,.95), 0 1px 18px rgba(0,0,0,.95), 0 0 40px rgba(0,0,0,.7); }
+.p-tl { top: 14vh; left: var(--gutter-l); }
+.p-bl { bottom: 12vh; left: var(--gutter-l); }
+.p-br { bottom: 12vh; right: var(--gutter-r); text-align: right; }
+.p-tr { top: 14vh; right: var(--gutter-r); text-align: right; }
+.p-c  { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+
+/* chapter + intro + end */
+.chap { background: var(--ink); }
+.chap .big { font-weight: 400; position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-54%); text-align: center; font-family: var(--display); font-style: italic; font-size: clamp(54px, 17vw, 270px); line-height: 1; margin: 0; padding: 0 var(--gutter-r) 0 var(--gutter-l); will-change: transform; }
+.chap .sub { position: absolute; left: var(--gutter-l); right: var(--gutter-r); bottom: 14vh; text-align: center; font-size: clamp(10.5px, 1vw, 13px); letter-spacing: .22em; text-transform: uppercase; color: var(--dust); }
+.title .el { font-size: clamp(36px, 7.2vw, 120px); }
+
+/* overlays */
+#vig { position: fixed; inset: 0; pointer-events: none; z-index: 20; background: radial-gradient(120% 90% at 50% 45%, transparent 45%, rgba(5,4,7,.72) 100%), linear-gradient(to top, rgba(5,4,7,.45), transparent 32%); }
+#grain { position: fixed; inset: -50px; pointer-events: none; z-index: 21; opacity: .11; mix-blend-mode: overlay; background-size: 220px 220px; }
+#hud { position: fixed; z-index: 30; left: 0; right: 0; top: 0; padding: calc(16px + env(safe-area-inset-top, 0px)) var(--gutter-r) 0 var(--gutter-l); display: flex; justify-content: space-between; gap: 16px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dust); pointer-events: none; }
+#chapname { font-family: var(--display); font-size: 15px; letter-spacing: .12em; text-transform: none; min-width: 0; transition: opacity .8s; }
+#credlink { position: fixed; z-index: 30; left: var(--gutter-l); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--dust); text-decoration: none; opacity: .6; padding: 6px 0; }
+#credlink:hover, #credlink:focus-visible { opacity: 1; color: var(--bone); outline: none; text-decoration: underline; text-underline-offset: 4px; }
+#credits { position: fixed; inset: 0; z-index: 60; overflow-y: auto; background: rgba(11,10,12,.97); padding: calc(28px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(40px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+#credits .cwrap { max-width: 38rem; margin: 0 auto; font-family: var(--display); font-size: 18px; line-height: 1.5; color: var(--bone); }
+#credits h2 { font-style: italic; font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1; margin: 1.2em 0 .3em; }
+#credits h3 { font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--dust); margin: 2.4em 0 .8em; }
+#credits p { margin: 0 0 .9em; }
+#credits .lead { color: var(--dust); font-style: italic; }
+#credits ul { list-style: none; padding: 0; margin: 0 0 1em; display: grid; gap: .7em; }
+#credits .a { display: block; color: var(--bone); }
+#credits li { color: var(--dust); }
+#credits a { color: var(--bone); text-underline-offset: 4px; }
+#credits button { font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bone); background: none; border: 1px solid rgba(238,228,211,.35); padding: 8px 12px; cursor: pointer; }
+#credits button:hover, #credits button:focus-visible { border-color: var(--bone); outline: none; }
+#credits .mail { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+#credits .mail a { font-family: var(--mono); font-size: 14px; letter-spacing: .04em; overflow-wrap: anywhere; }
+#credclose { position: absolute; top: 0; right: 0; }
+#credits .cwrap { position: relative; }
+html.credopen { overflow: hidden; }
+#snd { font: inherit; letter-spacing: inherit; text-transform: inherit; background: none; color: var(--dust); border: 1px solid rgba(238,228,211,.28); padding: 6px 10px; cursor: pointer; pointer-events: auto; flex: none; }
+#snd:hover, #snd:focus-visible { color: var(--bone); border-color: var(--bone); outline: none; }
+#snd[aria-pressed="true"] { color: var(--bone); border-color: rgba(238,228,211,.6); }
+#prog { position: fixed; z-index: 30; right: max(8px, env(safe-area-inset-right, 0px)); top: 20vh; bottom: 20vh; width: 1px; background: rgba(238,228,211,.14); pointer-events: none; }
+#prog i { position: absolute; left: -1px; top: 0; width: 3px; height: 3px; border-radius: 50%; background: var(--bone); }
+#hint { position: fixed; z-index: 30; left: 0; right: 0; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--dust); pointer-events: none; transition: opacity 1s; animation: blink 3.4s ease-in-out infinite; }
+#hint.off { opacity: 0; animation: none; }
+@keyframes blink { 50% { opacity: .35; } }
+
+@media (max-width: 640px) {
+  .p-tr, .p-br { text-align: left; right: auto; left: var(--gutter-l); }
+  #prog { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { #hint { animation: none; } }
+</style>
+
+<div id="stage" aria-live="off"></div>
+<div id="vig"></div>
+<div id="grain"></div>
+<div id="hud">
+  <div id="chapname"></div>
+  <button type="button" id="snd" aria-pressed="false">Sound: off</button>
+</div>
+<div id="prog"><i></i></div>
+<a id="credlink" href="#credits">Credits</a>
+<div id="hint">κύλισε</div>
+<div id="spacer"></div>
+<section id="credits" role="dialog" aria-modal="true" aria-labelledby="cred-h" hidden>
+  <div class="cwrap">
+    <button type="button" id="credclose" aria-label="Close credits">Close</button>
+    <h2 id="cred-h">Credits</h2>
+    <p class="lead">Όνειρο στη Λευκωσία · A dream in Nicosia. A photo-tale about Nicosia, Cyprus.</p>
+
+    <h3>Photographs and site</h3>
+    <p>All photographs and the design of this site are by <strong>Mikhail Ershov</strong>.<br>© Mikhail Ershov. All rights reserved. Please ask before using or reproducing any image.</p>
+    <p class="mail"><a href="mailto:mikhail.ershov@gmail.com" id="mailaddr">mikhail.ershov@gmail.com</a></p>
+
+    <h3>Texts</h3>
+    <ul>
+      <li><span class="a">Ὅμηρος · Homer</span> <i>Iliad</i> 6.146 (generations of leaves); <i>Odyssey</i> 2.1 (“rosy-fingered Dawn”), 7.114 and 7.117–118 (the orchard of Alcinous), 11.12 (the sun set and all the streets grew dark), 11.206–207 (a shadow, a dream).</li>
+      <li><span class="a">Ὁμηρικοὶ ὕμνοι · Homeric Hymns</span> Hymn 6 to Aphrodite, line 2 (Cyprus).</li>
+      <li><span class="a">Ἡράκλειτος · Heraclitus</span> the waking and the sleeping (B89, as quoted by Plutarch, <i>De superstitione</i> 166c); the rivers (B49a).</li>
+      <li><span class="a">Πίνδαρος · Pindar</span> <i>Pythian</i> 8, lines 95–96 (“the dream of a shadow”); <i>Olympian</i> 1, line 1 (“water is best”).</li>
+      <li><span class="a">Σαπφώ · Sappho</span> fragment 104a, first line (Hesperus); fragment 168B (the moon and the Pleiades).</li>
+      <li><span class="a">Ἀλκμάν · Alcman</span> fragment 89 (Page), the sleeping mountains.</li>
+      <li><span class="a">Σιμωνίδης · Simonides</span> “painting is silent poetry”, as quoted by Plutarch.</li>
+      <li><span class="a">Θουκυδίδης · Thucydides</span> 7.77: “men make the city, not walls or ships empty of men”.</li>
+      <li><span class="a">Κωνσταντίνος Π. Καβάφης · C. P. Cavafy</span> “Η πόλις” (The City) and “Τείχη” (Walls).</li>
+    </ul>
+    <p>These authors are in the public domain. The English lines are free translations made for this site. The other short Greek lines were written for this project.</p>
+
+    <h3>Typefaces</h3>
+    <p>EB Garamond and IBM Plex Mono, both under the SIL Open Font License, served by Google Fonts.</p>
+
+    <h3>Notes</h3>
+    <p>The site sets no cookies and has no analytics. Its only outside request is for the fonts above.</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  var RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- content ---------------------------------------------------------------
+  var SECS = [{"prof": 15, "dir": "prologue", "items": [{"t": "full", "img": ["001"], "dim": 0.75, "cls": "title", "pos": "p-bl", "chap": "Όνειρο στη Λευκωσία", "el": "Όνειρο στη Λευκωσία", "en": "A dream in Nicosia"}, {"t": "full", "img": ["170"], "pos": "p-tl", "cls": "q", "dim": 0.72, "el": "ἣ πάσης Κύπρου κρήδεμνα λέλογχεν.", "src": "Ὁμηρικὸς ὕμνος Στ΄ · Εἰς Ἀφροδίτην", "en": "Whose lot is the walled cities of all Cyprus."}, {"t": "full", "img": ["198"], "pos": "p-tl", "cls": "q", "dim": 0.8, "el": "τοῖς ἐγρηγορόσιν ἕνα καὶ κοινὸν κόσμον εἶναι, τῶν δὲ κοιμωμένων ἕκαστον εἰς ἴδιον ἀναστρέφεσθαι.", "src": "Ἡράκλειτος", "en": "The waking share one common world; each sleeper turns away into a private one."}]}, {"prof": 16, "dir": "midday", "items": [{"t": "chap", "bg": "002", "word": "Μεσημέρι", "en": "Midday", "chap": "Μεσημέρι"}, {"t": "mix", "img": ["128", "002"], "bm": "screen", "pos": "p-br", "el": "Στα τζάμια, ο ουρανός φαίνεται λίγο πιο κοντά.", "en": "In the windows, the sky seems a little closer."}, {"t": "full", "img": ["003"], "dim": 0.85, "pos": "p-tl", "cls": "q", "el": "Καινούριους τόπους δεν θά βρεις, δεν θάβρεις άλλες θάλασσες. Η πόλις θα σε ακολουθεί.", "src": "Κ. Π. Καβάφης · Η πόλις", "en": "You will find no new lands, you will find no other seas. The city will follow you."}, {"t": "slices", "img": ["066"], "pos": "p-bl", "el": "Το μεσημέρι, οι δρόμοι αδειάζουν για λίγο.", "en": "At midday, the streets empty for a while."}, {"t": "full", "img": ["040"], "pos": "p-br", "el": "Το φανάρι αλλάζει. Ο δρόμος μένει άδειος.", "en": "The light changes. The road stays empty."}, {"t": "full", "img": ["041"]}, {"t": "full", "img": ["057"], "pos": "p-bl", "el": "Οι σκιές φτάνουν ως την απέναντι πλευρά.", "en": "The shadows reach the other side of the street."}, {"t": "full", "img": ["083"], "dim": 0.95, "pos": "p-tr", "el": "Κανείς δεν φαίνεται να βιάζεται.", "en": "No one seems to be in a hurry."}, {"t": "mix", "img": ["081", "082"], "bm": "multiply", "mop": 0.92, "mrb": 120, "dim": 1.5, "pos": "p-bl", "el": "Τα κτίρια μένουν ακίνητα μέσα στο δυνατό φως.", "en": "The buildings stand still in the hard light."}, {"t": "full", "img": ["230"], "op": "100% 50%", "nz": 1}, {"t": "full", "img": ["143"]}, {"t": "full", "img": ["071"], "op": "50% 100%", "nz": 1, "pos": "p-bl", "el": "Στις δώδεκα, η σκιά έχει σχεδόν χαθεί.", "en": "At noon, the shadow has almost disappeared."}]}, {"prof": 6, "dir": "gardens", "items": [{"t": "chap", "bg": "130", "word": "Δέντρα", "en": "Trees", "chap": "Δέντρα"}, {"t": "full", "img": ["130"], "gs": 1, "pos": "p-bl", "cls": "q", "el": "οἵη περ φύλλων γενεή, τοίη δὲ καὶ ἀνδρῶν.", "src": "Ὅμηρος · Ἰλιάς Ζ΄", "en": "As is the generation of leaves, so is that of men."}, {"t": "tri", "img": ["139", "136", "135"], "gs": 1}, {"t": "full", "img": ["131"], "gs": 0.9, "pos": "p-tr", "el": "Στην πόλη, κάθε εποχή αφήνει διαφορετικό χρώμα στα δέντρα.", "en": "In the city, each season leaves a different colour on the trees."}, {"t": "mix", "img": ["141", "142"], "bm": "screen", "gs": 0.75}, {"t": "full", "img": ["174"], "gs": 0.55, "pos": "p-bl", "cls": "q", "el": "ἔνθα δὲ δένδρεα μακρὰ πεφύκασι τηλεθόωντα.", "src": "Ὅμηρος · Ὀδύσσεια Η΄", "en": "There tall trees grow, in full leaf."}, {"t": "mix", "img": ["181", "174"], "bm": "screen", "gs": 0.4, "pos": "p-br", "el": "Τα ανθισμένα δέντρα μυρίζουν πριν τα προσέξεις.", "en": "You smell the flowering trees before you notice them."}, {"t": "full", "img": ["177"], "gs": 0.22, "pos": "p-br", "el": "Ακόμη και τον χειμώνα, οι αυλές γεμίζουν άνθη.", "en": "Even in winter, the courtyards fill with blossoms."}, {"t": "mix", "img": ["184", "177"], "bm": "lighten", "gs": 0.12}, {"t": "full", "img": ["175"], "gs": 0.05}, {"t": "tri", "img": ["186", "187", "188"], "gs": 0}, {"t": "full", "img": ["199"], "gs": 0, "pos": "p-bl", "cls": "q", "el": "τάων οὔ ποτε καρπὸς ἀπόλλυται οὐδ’ ἀπολείπει χείματος οὐδὲ θέρευς.", "src": "Ὅμηρος · Ὀδύσσεια Η΄", "en": "Their fruit never perishes, nor fails, in winter or in summer."}, {"t": "full", "img": ["189"], "gs": 0, "pos": "p-bl", "el": "Η μιμόζα ξεχωρίζει ακόμη κι από απέναντι.", "en": "You can spot the mimosa from across the street."}, {"t": "mix", "img": ["190", "196"], "bm": "screen", "gs": 0}, {"t": "full", "img": ["204"], "gs": 0}, {"t": "mix", "img": ["202", "201"], "bm": "lighten", "gs": 0}, {"t": "slices", "img": ["183"], "gs": 0}, {"t": "full", "img": ["197"], "gs": 0}, {"t": "full", "img": ["182"], "gs": 0}]}, {"prof": 8, "dir": "market", "items": [{"t": "chap", "bg": "219", "word": "Αγορά", "en": "Market", "chap": "Αγορά"}, {"t": "full", "img": ["150"], "pos": "p-bl", "el": "Το πρωί, στην αγορά ακούγονται τιμές, χαιρετισμοί και παζάρια.", "en": "In the morning market, you hear prices, greetings and bargaining."}, {"t": "full", "img": ["219"]}, {"t": "full", "img": ["151"], "op": "50% 0%"}, {"t": "tri", "img": ["152", "153", "222"], "pos": "p-br", "el": "Κρεμμύδια: ένα ευρώ και πενήντα το κιλό.", "en": "Onions: one euro fifty a kilo."}, {"t": "full", "img": ["220"], "pos": "p-bl", "el": "Ένα καλάθι σαλιγκάρια στον πάγκο, δίπλα στις ντομάτες.", "en": "A basket of snails on the stall, next to the tomatoes."}, {"t": "full", "img": ["221"], "pos": "p-bl", "el": "Τα λουλούδια πωλούνται με το κιλό.", "en": "Flowers are sold by the kilo."}, {"t": "mix", "img": ["026", "100"], "bm": "overlay", "mop": 0.55, "pos": "p-tl", "el": "Στα τραπέζια, οι κουβέντες μπλέκονται με τον θόρυβο του δρόμου.", "en": "At the tables, conversations mingle with the noise of the street."}, {"t": "mix", "img": ["027", "112"], "bm": "overlay", "mop": 0.55, "pos": "p-tl"}, {"t": "full", "img": ["043"], "pos": "p-br", "el": "Τα ποδήλατα μένουν δεμένα έξω από τα μαγαζιά.", "en": "Bicycles stay locked outside the shops."}, {"t": "mix", "img": ["072", "076"], "bm": "screen", "pos": "p-bl", "el": "Το βράδυ, η μουσική φέρνει ξανά κόσμο στην πλατεία.", "en": "In the evening, music brings people back to the square."}]}, {"prof": 9, "dir": "walls", "items": [{"t": "chap", "bg": "147", "word": "Τείχη", "en": "Walls", "chap": "Τείχη"}, {"t": "full", "img": ["147"], "pos": "p-bl", "el": "Το παλιό τείχος είναι τώρα γεμάτο γκράφιτι.", "en": "The old wall is now covered in graffiti."}, {"t": "full", "img": ["148"]}, {"t": "tri", "img": ["054", "029", "137"], "tpos": [null, "63% 50%", "72% 50%"], "tdrift": [1, 0, 1], "tscale": [1.22, 1.04, 1.22], "pos": "p-br", "el": "Κάποιος ζωγράφισε ένα μάτι στον τοίχο. Τώρα κοιτάζει τον δρόμο.", "en": "Someone painted an eye on the wall. Now it looks out at the street."}, {"t": "full", "img": ["038"], "pos": "p-bl", "el": "Η πινακίδα απαγορεύει τη στάθμευση. Ο δρόμος δεν έχει πολύ χώρο.", "en": "The sign says no parking. The street leaves little room anyway."}, {"t": "full", "img": ["144"], "pan": 1.22}, {"t": "mix", "img": ["013", "009"], "bm": "normal", "mop": 0.96, "dim": 1.7, "xf": 1}, {"t": "full", "img": ["185"], "pos": "p-tl", "op": "100% 50%", "nz": 1, "cls": "q", "el": "Χωρίς περίσκεψιν, χωρίς λύπην, χωρίς αιδώ μεγάλα κ’ υψηλά τριγύρω μου έκτισαν τείχη.", "src": "Κ. Π. Καβάφης · Τείχη", "en": "Without thought, without pity, without shame, they built great high walls around me."}, {"t": "mix", "img": ["045", "044"], "bm": "overlay"}, {"t": "full", "img": ["000"], "pos": "p-bl", "cls": "q", "el": "ἄνδρες γὰρ πόλις, καὶ οὐ τείχη οὐδὲ νῆες ἀνδρῶν κεναί.", "src": "Θουκυδίδης · Ζ΄ 77", "en": "For men are the city, and not walls, nor ships empty of men."}]}, {"prof": 10, "dir": "shadows", "items": [{"t": "chap", "bg": "058", "word": "Σκιές", "en": "Shadows", "chap": "Σκιές"}, {"t": "full", "img": ["005"], "pos": "p-br", "el": "Το φως μένει αναμμένο, παρόλο που έξω έχει σκοτεινιάσει.", "en": "The light stays on, though it is already dark outside."}, {"t": "full", "img": ["058"]}, {"t": "full", "img": ["079"], "pos": "p-tl", "el": "Τα κλαδιά σχηματίζουν σκιές πάνω στον τοίχο.", "en": "Branches cast shadows across the wall."}, {"t": "full", "img": ["213"], "pos": "p-bl", "cls": "q", "el": "τρὶς δέ μοι ἐκ χειρῶν σκιῇ εἴκελον ἢ καὶ ὀνείρῳ ἔπτατ’.", "src": "Ὅμηρος · Ὀδύσσεια Λ΄", "en": "Three times she flew from my hands, like a shadow or a dream."}, {"t": "full", "img": ["010"], "op": "0% 0%", "nz": 1}, {"t": "mix", "img": ["062", "063"], "bm": "overlay"}, {"t": "full", "img": ["235"]}, {"t": "full", "img": ["215"], "op": "40% 100%", "nz": 1, "pos": "p-tl", "el": "Ο δρόμος έχει σχεδόν αδειάσει. Ένας άνθρωπος συνεχίζει να περπατά.", "en": "The street is almost empty. One person keeps walking."}, {"t": "full", "img": ["053"]}, {"t": "full", "img": ["231"], "op": "0% 0%", "nz": 1}, {"t": "full", "img": ["236"]}, {"t": "full", "img": ["218"], "pos": "p-bl", "cls": "q", "el": "σκιᾶς ὄναρ ἄνθρωπος.", "src": "Πίνδαρος · Πυθιόνικοι Η΄", "en": "Man is the dream of a shadow."}]}, {"prof": 7, "dir": "figures", "items": [{"t": "chap", "bg": "171", "word": "Πρόσωπα", "en": "Faces", "chap": "Πρόσωπα"}, {"t": "full", "img": ["171"], "pos": "p-br", "el": "Τα μανεκέν κοιτούν τον δρόμο όλη μέρα.", "en": "The mannequins watch the street all day."}, {"t": "full", "img": ["180"]}, {"t": "full", "img": ["056"], "op": "50% 0%", "nz": 1}, {"t": "mix", "img": ["095", "216"], "bm": "screen"}, {"t": "full", "img": ["234"], "pos": "p-tl", "el": "Για μια στιγμή, η βιτρίνα κρατά και τον δρόμο και όποιον περνά.", "en": "For a moment, the shop window holds both the street and the people passing by."}, {"t": "full", "img": ["193"], "pos": "p-bl", "cls": "q", "el": "τὴν ζωγραφίαν ποίησιν σιωπῶσαν.", "src": "Σιμωνίδης · στον Πλούταρχο", "en": "Painting is silent poetry."}, {"t": "mix", "img": ["193", "205"], "bm": "screen"}, {"t": "full", "img": ["237"], "pan": 1.2}, {"t": "full", "img": ["215"], "op": "40% 100%", "nz": 1}, {"t": "full", "img": ["022"], "pos": "p-bl", "el": "Μια γάτα κι ένας σκύλος συναντιούνται κάτω από το φως.", "en": "A cat and a dog meet beneath the streetlight."}, {"t": "full", "img": ["207"], "pos": "p-tr", "el": "Η γάτα έχει βρει το πιο ήσυχο σημείο του δρόμου.", "en": "The cat has found the quietest spot on the street."}, {"t": "full", "img": ["161"]}]}, {"prof": 11, "dir": "waters", "items": [{"t": "chap", "bg": "134", "word": "Ύδατα", "en": "Waters", "chap": "Ύδατα"}, {"t": "full", "img": ["129"], "pos": "p-c", "cls": "q", "el": "ἄριστον μὲν ὕδωρ.", "src": "Πίνδαρος · Ὀλυμπιόνικοι Α΄", "en": "Water is best."}, {"t": "full", "img": ["178"]}, {"t": "full", "img": ["134"]}, {"t": "full", "img": ["133"]}, {"t": "full", "img": ["194"], "pos": "p-bl", "el": "Η υγρασία στο τζάμι θολώνει τον κήπο.", "en": "Moisture on the glass blurs the garden."}, {"t": "full", "img": ["122"]}, {"t": "mix", "img": ["085", "086"], "bm": "screen", "pos": "p-br", "el": "Στη βιτρίνα καθρεφτίζονται τα σύννεφα και τα μανεκέν.", "en": "Clouds and mannequins are reflected in the shop window."}, {"t": "full", "img": ["067"]}, {"t": "full", "img": ["163"], "pos": "p-bl", "cls": "q", "el": "ποταμοῖς τοῖς αὐτοῖς ἐμβαίνομέν τε καὶ οὐκ ἐμβαίνομεν.", "src": "Ἡράκλειτος", "en": "We step and do not step into the same rivers."}, {"t": "full", "img": ["191"], "op": "100% 100%", "nz": 1, "pos": "p-tl", "el": "Το χώμα είναι ακόμη σκούρο από το νερό.", "en": "The soil is still dark with water."}]}, {"prof": 12, "dir": "dusk", "items": [{"t": "chap", "bg": "179", "word": "Δύση", "en": "Dusk", "chap": "Δύση"}, {"t": "full", "img": ["179"], "pos": "p-tr", "el": "Ο ήλιος χάνεται πίσω από τα βουνά.", "en": "The sun disappears behind the mountains."}, {"t": "full", "img": ["210"], "op": "50% 0%", "nz": 1}, {"t": "full", "img": ["233"]}, {"t": "full", "img": ["109"]}, {"t": "mix", "img": ["092", "093"], "bm": "screen", "pos": "p-bl", "el": "Στα διαμερίσματα ανάβουν τα φώτα, ένα ένα.", "en": "In the apartments, the lights come on one by one."}, {"t": "full", "img": ["033"], "pos": "p-bl", "cls": "q", "el": "Ἔσπερε, πάντα φέρων ὅσα φαίνολις ἐσκέδασ’ Αὔως.", "src": "Σαπφώ", "en": "Evening star, you bring back all that bright Dawn scattered."}, {"t": "full", "img": ["064"]}, {"t": "full", "img": ["168"], "pos": "p-tl", "cls": "q", "el": "δύσετό τ’ ἠέλιος σκιόωντό τε πᾶσαι ἀγυιαί.", "src": "Ὅμηρος · Ὀδύσσεια Λ΄", "en": "The sun set, and all the streets grew dark with shadow."}, {"t": "full", "img": ["004"], "pos": "p-bl", "cls": "q", "el": "εὕδουσι δ’ ὀρέων κορυφαί τε καὶ φάραγγες.", "src": "Ἀλκμάν", "en": "The mountain peaks and the ravines are asleep."}, {"t": "full", "img": ["195"]}, {"t": "full", "img": ["217"]}]}, {"prof": 13, "dir": "night", "items": [{"t": "chap", "bg": "214", "word": "Νύχτα", "en": "Night", "chap": "Νύχτα"}, {"t": "full", "img": ["214"], "pos": "p-tr", "el": "Μερικά παράθυρα μένουν αναμμένα πολύ μετά τα μεσάνυχτα.", "en": "A few windows stay lit long after midnight."}, {"t": "full", "img": ["006"], "pos": "p-tl", "el": "Στον σχεδόν άδειο δρόμο, το πρατήριο μένει ανοιχτό.", "en": "On the nearly empty road, the petrol station stays open."}, {"t": "mix", "img": ["124", "008"], "bm": "lighten"}, {"t": "full", "img": ["125"], "pos": "p-bl", "el": "Οι γάτες βγαίνουν όταν οι δρόμοι ησυχάζουν.", "en": "The cats come out when the streets grow quiet."}, {"t": "full", "img": ["232"], "pos": "p-bl", "el": "Στο φωτισμένο τζάμι της πόρτας διακρίνεται το περίγραμμα μιας γάτας.", "en": "In the lit glass of the door, the outline of a cat can be seen."}, {"t": "full", "img": ["212"], "pos": "p-tr", "op": "50% 100%", "nz": 1, "el": "Σχεδόν όλα τα παράθυρα έχουν σβήσει. Ένα μένει φωτισμένο.", "en": "Almost every window is dark. One is still lit."}, {"t": "full", "img": ["156"], "pos": "p-tl", "cls": "q", "el": "δέδυκε μὲν ἀ σελάννα καὶ Πληΐαδες, μέσαι δὲ νύκτες, παρὰ δ’ ἔρχετ’ ὥρα, ἐγὼ δὲ μόνα κατεύδω.", "src": "Σαπφώ", "en": "The moon has set, and the Pleiades; it is the middle of the night, time goes by, and I sleep alone."}, {"t": "full", "img": ["211"], "pos": "p-br", "el": "Τα τραπέζια είναι ακόμη στημένα, αλλά οι πελάτες έχουν φύγει.", "en": "The tables are still set, but the customers have gone."}, {"t": "full", "img": ["069"], "pos": "p-bl", "el": "Η βουκαμβίλια ανθίζει ακόμη κάτω από τον φανοστάτη.", "en": "The bougainvillea is still flowering beneath the streetlight."}, {"t": "full", "img": ["031"], "pos": "p-tl", "op": "0% 50%", "nz": 1, "el": "Στο διπλανό στενό, τα φώτα δείχνουν πως κάτι συμβαίνει.", "en": "In the next street, the lights suggest something is going on."}, {"t": "full", "img": ["160"], "pos": "p-br", "el": "Η μουσική συνεχίζεται και ο κόσμος μένει στην πλατεία.", "en": "The music goes on, and people stay in the square."}, {"t": "full", "img": ["162"]}]}, {"prof": 14, "dir": "dawn", "items": [{"t": "chap", "bg": "105", "word": "Ξημέρωμα", "en": "Dawn", "chap": "Ξημέρωμα"}, {"t": "full", "img": ["105"], "pos": "p-bl", "el": "Ο ήλιος ανεβαίνει πάνω από τα αυτοκίνητα και τις πολυκατοικίες.", "en": "The sun rises above the cars and apartment blocks."}, {"t": "full", "img": ["102"]}, {"t": "full", "img": ["052"], "pos": "p-bl", "cls": "q", "el": "ἦμος δ’ ἠριγένεια φάνη ῥοδοδάκτυλος Ἠώς.", "src": "Ὅμηρος · Ὀδύσσεια Β΄", "en": "When early-born, rosy-fingered Dawn appeared."}, {"t": "full", "img": ["103"], "pos": "p-br", "el": "Ο δρόμος είναι σχεδόν άδειος αυτή την ώρα.", "en": "The street is almost empty at this hour."}, {"t": "full", "img": ["012"], "pos": "p-br", "el": "Η είσοδος αρχίζει να γεμίζει κόσμο.", "en": "People begin to gather at the entrance."}, {"t": "full", "img": ["094"]}, {"t": "full", "img": ["146"], "pos": "p-br", "el": "Ένα τραπέζι στη σκιά, πριν αρχίσει η μέρα.", "en": "A table in the shade, before the day begins."}, {"t": "mix", "img": ["121", "149"], "bm": "overlay", "pos": "p-br", "el": "Στη Λευκωσία, η καθημερινότητα συνεχίζεται και στις δύο πλευρές.", "en": "In Nicosia, everyday life continues on both sides."}, {"t": "end", "word": "Λευκωσία", "en": "Nicosia"}]}];
+  var B = [];
+  SECS.forEach(function (sec) { sec.items.forEach(function (b, i) { b.prof = sec.prof; b.local = i + 1; b.sec = sec.dir; B.push(b); }); });
+  var N = B.length, STEP = 0.72;
+
+  // ---- build -----------------------------------------------------------------
+  var stage = document.getElementById('stage');
+  function el(tag, cls, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (parent) parent.appendChild(e); return e; }
+  function mkimg(cls, parent, id) { var i = el('img', cls, parent); i.dataset.src = 'img/' + id + '.jpg'; i.alt = ''; i.decoding = 'async'; return i; }
+  function hash(n) { var x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+  B.forEach(function (b, k) {
+    var d = el('section', 'beat ' + (b.t === 'chap' || b.t === 'end' ? 'chap' : ''), stage);
+    d.style.zIndex = k + 1;
+    b.node = d; b.imgs = []; b.words = []; b.ghosts = [];
+    if (b.t === 'full') {
+      b.main = mkimg('ph', d, b.img[0]); b.imgs.push(b.main);
+      b.gh = mkimg('ph ghost', d, b.img[0]); b.imgs.push(b.gh);
+    } else if (b.t === 'frame') {
+      b.bgi = mkimg('ph bgblur', d, b.img[0]); b.imgs.push(b.bgi);
+      b.fr = el('div', 'frame', d);
+      b.main = mkimg('ph', b.fr, b.img[0]); b.imgs.push(b.main);
+      b.gh = mkimg('ph ghost', b.fr, b.img[0]); b.imgs.push(b.gh);
+    } else if (b.t === 'double') {
+      b.main = mkimg('ph', d, b.img[0]); b.imgs.push(b.main);
+      b.two = mkimg('ph dbl', d, b.img[1]); b.imgs.push(b.two);
+    } else if (b.t === 'mix') {
+      b.main = mkimg('ph', d, b.img[0]); b.imgs.push(b.main);
+      b.mw = el('div', 'mixw', d); b.mw.style.mixBlendMode = b.bm || 'screen';
+      b.mo = mkimg('ph', b.mw, b.img[1]); b.imgs.push(b.mo);
+    } else if (b.t === 'tri') {
+      var tw = el('div', 'tri', d); b.cols = []; b.cimgs = [];
+      for (var c = 0; c < 3; c++) {
+        var col = el('div', 'col', tw); var ci = mkimg('', col, b.img[c]);
+        b.imgs.push(ci); b.cols.push(col); b.cimgs.push(ci); if (b.tpos && b.tpos[c]) ci.style.objectPosition = b.tpos[c];
+      }
+    } else if (b.t === 'slices') {
+      var wrap = el('div', 'slices', d); b.sls = [];
+      var S = 9;
+      for (var s = 0; s < S; s++) {
+        var sl = el('div', 'sl', wrap);
+        sl.style.top = (s * 100 / S) + '%'; sl.style.height = (100 / S + 0.2) + '%';
+        var im = mkimg('', sl, b.img[0]);
+        im.style.height = (S * 100) + '%'; im.style.top = (-s * 100) + '%';
+        b.imgs.push(im); b.sls.push(sl);
+      }
+    } else if (b.t === 'chap') {
+      b.bgi = mkimg('ph bgblur', d, b.bg); b.imgs.push(b.bgi); b.bgi.style.opacity = .55;
+      b.big = el('p', 'big', d); b.big.textContent = b.word;
+      b.sub = el('div', 'sub', d);
+    } else if (b.t === 'end') {
+      b.big = el('p', 'big', d); b.big.textContent = b.word;
+      b.sub = el('div', 'sub', d);
+    }
+    if (b.el) {
+      var tx = el('div', 'txt ' + (b.pos || 'p-bl') + (b.cls ? ' ' + b.cls : ''), d);
+      var h = el('p', 'el', tx);
+      b.el.split(' ').forEach(function (w) { var s = el('span', 'w', h); s.textContent = w; b.words.push(s); });
+      if (b.src) { var sp = el('p', 'src', tx); sp.textContent = b.src; }
+      b.trn = el('p', 'tr', tx);
+      b.txt = tx;
+    }
+  });
+
+  B.forEach(function (b) { if (b.op) b.imgs.forEach(function (im) { im.style.objectPosition = b.op; }); });
+  (function () { var c = 0; B.forEach(function (b, i) { if (b.t === 'chap') c++; b.ci = c; }); })();
+  B.forEach(function (b) {
+    if (b.trn) b.trn.textContent = b.en || '';
+    if (b.sub) b.sub.textContent = b.en || '';
+  });
+
+  // chapter -> sound profile (0 intro, 1 midday, 2 shadows, 3 dusk, 4 night, 5 dawn)
+  var PROF = [15];
+  // ---- sound: a synthesised street at five times of day (no melody) ----------------
+  var audio = (function () {
+    var ctx = null, on = false, N = {}, lastCi = -1, nextEv = 0, lastEv = '', prevG = 0, lastShot = 0;
+    // chapter order: intro, midday, shadows, dusk, night, dawn
+    var BED = { stream: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0], crowd: [0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0, 0.2, 0.1, 0.15, 0, 0.12], hum: [0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0.4, 0, 0, 0.12], cic: [0, .9, .3, .12, 0, 0, 0.3, 0, 0.3, 0.15, 0.1, 0.1, 0.2, 0, 0.1, 0.2, 1], cri: [0, 0, 0, .35, .9, .3, 0, 0.15, 0, 0, 0.1, 0.4, 0.3, 0.7, 0.1, 0, 0], wind: [.15, .2, .5, .3, .3, .4, 0.55, 0.2, 0.1, 0.5, 0.55, 0.3, 0.3, 0.15, 0.3, 0.3, 0.1],
+                city: [.5, .7, .4, .45, .35, .3, 0.12, 0.55, 0.4, 0.3, 0.22, 0.15, 0.5, 0.3, 0.25, 0.2, 0.35], fan: [.15, .3, .1, .1, .25, .05, 0, 0.3, 0, 0.1, 0.1, 0, 0.15, 0.12, 0.1, 0.18, 0.2] };
+    var EV = {
+      steps:     [.3, .4, .6, .4, .7, .3, 0.1, 0.2, 0.3, 0.5, 0.6, 0.15, 0.4, 0.3, 0.5, 0.2, 0.3],
+      car:       [.5, .7, .4, .5, .4, .3, 0.1, 0.3, 0.2, 0.3, 0.2, 0.1, 0.4, 0.3, 0.4, 0.15, 0.5],
+      moto:      [.1, .3, .2, .3, .3, .1, 0, 0.1, 0.2, 0.2, 0.1, 0, 0.3, 0.3, 0.5, 0.1, 0.5],
+      bike:      [.2, .3, .3, .4, .2, .2, 0.05, 0, 0.3, 0.2, 0.1, 0.1, 0.3, 0.1, 0.5, 0.1, 0.3],
+      clank:     [.1, .2, .4, .2, .4, .2, 0, 0.15, 0.2, 0.5, 0.2, 0.1, 0.3, 0.2, 0.5, 0.1, 0.3],
+      murmur:    [.2, .5, .2, .5, .3, 0, 0, 0.3, 1.2, 0.1, 0, 0, 0.4, 0.2, 0.2, 0.25, 0.4],
+      clink:     [0, .3, 0, .3, .1, 0, 0, 0.2, 0.5, 0, 0, 0, 0.35, 0.2, 0.4, 0.2, 0.4],
+      meow:      [0, 0, .05, .1, .3, .1, 0.05, 0.5, 0.1, 0.2, 0.15, 0.1, 0.2, 0.5, 0.3, 0.15, 0.1],
+      bird:      [.3, .4, .1, .2, 0, 1, 1.1, 0, 0.3, 0.2, 0, 0.6, 0.3, 0, 1.3, 0.5, 0.15],
+      sprinkler: [.2, .4, 0, .1, 0, .5, 0.5, 0, 0, 0, 0, 0.5, 0.3, 0, 0.9, 0.2, 0.2],
+      drip:      [0, 0, .2, .5, .2, .1, 0, 0.1, 0, 0.1, 0.35, 1, 0, 0.2, 0.4, 0.3, 0],
+      rustle:    [.3, .3, .5, .3, .3, .3, 0.6, 0.1, 0.6, 0.4, 0.7, 0.5, 0.3, 0.4, 0.6, 0.6, 0.2],
+      plane:     [.1, .2, .1, .2, .1, .1, 0.1, 0.1, 0.1, 0.3, 0.2, 0.1, 0.2, 0.15, 0.3, 0.2, 0.4],
+      bee:       [0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2],
+      fall:      [0, 0, 0, 0, 0, 0, .6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      heels:     [0, 0, 0, 0, 0, 0, 0, 1.1, 0.3, 0.2, 0.2, 0, 0.2, 0.25, 0.35, 0, 0.3],
+      chime:     [0, 0, 0, 0, 0, 0, 0, .6, 0.1, 0, 0, 0, 0, 0, 0, 0.15, 0],
+      revmurmur: [0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0.4, 0, 0, 0, 0, 0, 0],
+      crate:     [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0.2, 0, 0],
+      coins:     [0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0, 0, 0, 0, 0, 0],
+      bikebell:  [0, 0, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0, 0.3, 0, 0.4, 0, 0.3],
+      shells:    [0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0, 0, 0],
+      spray:     [0, 0, 0, 0, 0, 0, 0, 0, 0, .9, 0, 0, 0, 0, 0, 0, 0],
+      fence:     [0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0, 0],
+      clap:      [0, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0.15, 0, 0, 0, 0, 0, 0],
+      tick:      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0.4, 0, 0.7, 0.3],
+      breath:    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .6, 0, 0, 0.3, 0, 0.6, 0],
+      frog:      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0],
+      splash:    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5, 0, 0, 0, 0, 0],
+      raindrops: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .6, 0, 0, 0, 0, 0],
+      swifts:    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.1],
+      rolldown:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .6, 0.2, 0, 0, 0.3],
+      lampbuzz:  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      distmusic: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .9, 0, 0, 0],
+      dog:       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .6, 0.3, 0, 0.1],
+      rollup:    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0.2],
+      broom:     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0],
+      creak:     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      compressor:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+      siren:     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .5],
+      scoop:     [0, 0, 0, 0, 0, 0, 0, 0, .6, 0, 0, 0, 0, 0, 0, 0, 0],
+      bell:      [0, 0, 0, .15, 0, .15, 0, 0, 0, 0.35, 0.2, 0, 0.6, 0.2, 0.5, 0.35, 0.2]
+    };
+    var EVN = Object.keys(EV);
+    var EXTRA = ['colorIn'];
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+    function noiseSrc(t) {
+      var s = ctx.createBufferSource(); s.buffer = N.noiseBuf; s.loop = true; s.start(t || 0, Math.random() * 1.5); return s;
+    }
+    function reverb() {
+      var len = ctx.sampleRate * 3.2, b = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (var c = 0; c < 2; c++) { var d = b.getChannelData(c); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5); }
+      var cv = ctx.createConvolver(); cv.buffer = b; return cv;
+    }
+    function lfo(f, depth, target, type) {
+      var o = ctx.createOscillator(); o.type = type || 'sine'; o.frequency.value = f;
+      var g = ctx.createGain(); g.gain.value = depth; o.connect(g); g.connect(target); o.start(); return o;
+    }
+    function filt(type, f, q) { var b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; if (q) b.Q.value = q; return b; }
+    // route a sound to the mix at a stereo position, with some of it sent to the room
+    function out(node, pan, wet) {
+      var pn = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain();
+      if (pn.pan) pn.pan.value = pan; node.connect(pn); pn.connect(N.dry);
+      var sg = ctx.createGain(); sg.gain.value = wet; pn.connect(sg); sg.connect(N.rev); return pn;
+    }
+    function burst(t, dur, ftype, f, q, peak, a, pan, wet) {          // a short shaped puff of noise
+      var src = noiseSrc(t), fl = filt(ftype, f, q), g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(fl); fl.connect(g); out(g, pan, wet); src.stop(t + dur + 0.05);
+    }
+    function ping(t, f0, f1, dur, peak, pan, wet, type) {              // a short tone with a pitch slide
+      var o = ctx.createOscillator(), g = ctx.createGain(); o.type = type || 'sine';
+      o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.6);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); out(g, pan, wet); o.start(t); o.stop(t + dur + 0.05);
+    }
+    function sweepPass(t, dur, peak, f0, f1, pan0, pan1, wet, src2) {  // something passing by: swell, filter sweep, stereo move
+      var src = noiseSrc(t), fl = filt('lowpass', f0, 0.8), g = ctx.createGain();
+      fl.frequency.setValueAtTime(f0, t); fl.frequency.linearRampToValueAtTime(f1, t + dur * 0.5); fl.frequency.linearRampToValueAtTime(f0, t + dur);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + dur * 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(fl); fl.connect(g); var pn = out(g, pan0, wet);
+      if (pn.pan) pn.pan.linearRampToValueAtTime(pan1, t + dur);
+      src.stop(t + dur + 0.1); return { g: g, pn: pn };
+    }
+    var E = {
+      steps: function (t) {
+        var n = Math.floor(rnd(5, 10)), pan = rnd(-0.8, 0.8), dp = rnd(-0.08, 0.08), v = rnd(0.05, 0.1), gap = rnd(0.5, 0.64);
+        for (var k = 0; k < n; k++) {
+          var tt = t + k * gap + rnd(-0.03, 0.03);
+          burst(tt, 0.09, 'bandpass', rnd(800, 1500), 1.3, v, 0.004, pan, 0.35);
+          ping(tt, 110, 55, 0.07, v * 0.6, pan, 0.2);
+          pan = Math.max(-0.95, Math.min(0.95, pan + dp));
+        }
+      },
+      car: function (t) { var d = rnd(3.2, 5), s = Math.random() < 0.5 ? -1 : 1; sweepPass(t, d, rnd(0.07, 0.12), 260, 1500, 0.9 * s, -0.9 * s, 0.3); },
+      moto: function (t) {
+        var d = rnd(2.2, 3.2), s = Math.random() < 0.5 ? -1 : 1, o = ctx.createOscillator(), fl = filt('lowpass', 700), g = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(62, t); o.frequency.linearRampToValueAtTime(98, t + d * 0.45); o.frequency.linearRampToValueAtTime(54, t + d);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.035, t + d * 0.45); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(fl); fl.connect(g); var pn = out(g, 0.9 * s, 0.3); if (pn.pan) pn.pan.linearRampToValueAtTime(-0.9 * s, t + d);
+        o.start(t); o.stop(t + d + 0.1); sweepPass(t, d, 0.04, 400, 1800, 0.9 * s, -0.9 * s, 0.2);
+      },
+      bike: function (t) {                                            // freewheel ticks slowing down
+        var pan = rnd(-0.7, 0.7), gap = 0.028, tt = t;
+        for (var k = 0; k < 30; k++) { burst(tt, 0.02, 'bandpass', 3400, 4, 0.11, 0.002, pan, 0.25); tt += gap; gap *= 1.07; }
+      },
+      clank: function (t) {                                           // a gate or a metal door somewhere
+        var pan = rnd(-0.8, 0.8), f = rnd(380, 520);
+        burst(t, 0.05, 'highpass', 1800, 0.7, 0.08, 0.002, pan, 0.5);
+        ping(t, f, f * 0.98, 0.5, 0.035, pan, 0.6); ping(t, f * 2.36, f * 2.3, 0.35, 0.02, pan, 0.6);
+      },
+      murmur: function (t) {                                          // voices too far away to understand
+        var d = rnd(2, 4), pan = rnd(-0.7, 0.7), src = noiseSrc(t), a = filt('bandpass', 700, 3), b = filt('bandpass', 1700, 4), g = ctx.createGain(), sum = ctx.createGain();
+        lfo(rnd(3, 5), 350, a.frequency); lfo(rnd(2, 4), 600, b.frequency);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + d * 0.4); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        src.connect(a); src.connect(b); a.connect(sum); b.connect(sum); sum.connect(g); out(g, pan, 0.7); src.stop(t + d + 0.1);
+      },
+      clink: function (t) {                                           // glass on a saucer
+        var pan = rnd(-0.6, 0.6), f = rnd(2300, 2700);
+        ping(t, f, f, 0.3, 0.03, pan, 0.5); ping(t, f * 1.5, f * 1.5, 0.22, 0.018, pan, 0.5);
+        ping(t + rnd(0.35, 0.6), f * 1.12, f * 1.12, 0.25, 0.02, pan, 0.5);
+      },
+      meow: function (t) {
+        var pan = rnd(-0.7, 0.7), o = ctx.createOscillator(), a = filt('bandpass', 1300, 2.5), fl = filt('lowpass', 3000), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(470, t); o.frequency.linearRampToValueAtTime(760, t + 0.14); o.frequency.linearRampToValueAtTime(500, t + 0.5);
+        v.frequency.value = 7; vg.gain.value = 22; v.connect(vg); vg.connect(o.frequency);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        o.connect(a); a.connect(fl); fl.connect(g); out(g, pan, 0.55); o.start(t); v.start(t); o.stop(t + 0.6); v.stop(t + 0.6);
+      },
+      bird: function (t) {
+        var n = Math.floor(rnd(2, 6)), pan = rnd(-0.8, 0.8), f = rnd(2800, 4200), up = Math.random() < 0.6, tt = t;
+        for (var k = 0; k < n; k++) { ping(tt, f, f * (up ? rnd(1.25, 1.6) : rnd(0.6, 0.8)), 0.1, 0.022, pan, 0.4); tt += rnd(0.11, 0.2); f *= rnd(0.96, 1.05); }
+      },
+      sprinkler: function (t) {                                       // a garden sprinkler: tsk-tsk-tsk and the swing back
+        var n = Math.floor(rnd(7, 11)), pan = rnd(-0.6, 0.6);
+        for (var k = 0; k < n; k++) burst(t + k * 0.21, 0.07, 'bandpass', 4300, 1.6, 0.075, 0.003, pan, 0.2);
+        burst(t + n * 0.21 + 0.1, 0.8, 'bandpass', 3000, 0.9, 0.04, 0.25, pan, 0.2);
+      },
+      drip: function (t) {
+        var pan = rnd(-0.7, 0.7), n = Math.floor(rnd(1, 4)), tt = t;
+        for (var k = 0; k < n; k++) { var f = rnd(1000, 1500); ping(tt, f, f * 0.65, 0.14, 0.03, pan, 0.8); tt += rnd(0.4, 1.1); }
+      },
+      rustle: function (t) {
+        var pan = rnd(-0.8, 0.8);
+        for (var k = 0; k < 14; k++) burst(t + Math.random() * 0.9, rnd(0.015, 0.04), 'highpass', rnd(2600, 4200), 0.7, rnd(0.02, 0.06), 0.002, pan, 0.3);
+      },
+      plane: function (t) { var s = Math.random() < 0.5 ? -1 : 1; sweepPass(t, rnd(8, 12), 0.14, 150, 420, 0.7 * s, -0.7 * s, 0.5); },
+      bell: function (t) {                                            // a single distant strike
+        var f = rnd(170, 230), pan = rnd(-0.5, 0.5), P = [1, 2.4, 3.0, 4.1], V = [0.04, 0.02, 0.014, 0.007];
+        for (var k = 0; k < P.length; k++) ping(t, f * P[k], f * P[k] * 0.997, 5.5 / (1 + k * 0.5), V[k], pan, 0.9);
+      },
+      swifts: function (t) {                                           // swifts screaming past at dusk
+        var pan = rnd(-0.8, 0.8), g, k;
+        for (g = 0; g < 2; g++) { var t0 = t + g * rnd(0.35, 0.7); for (k = 0; k < Math.floor(rnd(5, 9)); k++) ping(t0 + k * 0.055, rnd(4000, 4800), rnd(6200, 7400), 0.05, 0.018, pan, 0.4); pan = -pan * 0.7; }
+      },
+      rolldown: function (t) {                                         // a shop's roller shutter pulled down
+        var pan = rnd(-0.7, 0.7), k;
+        burst(t, 0.9, 'lowpass', 320, 0.8, 0.06, 0.05, pan, 0.5);
+        for (k = 0; k < 26; k++) burst(t + k * 0.032, 0.04, 'bandpass', rnd(900, 1700), 1.2, 0.05, 0.001, pan, 0.5);
+        ping(t + 0.95, 130, 90, 0.25, 0.06, pan, 0.6); burst(t + 0.95, 0.08, 'lowpass', 600, 1, 0.08, 0.002, pan, 0.6);
+      },
+      lampbuzz: function (t) {                                         // a failing street lamp: buzz and flicker
+        var pan = rnd(-0.7, 0.7), k, tt = t;
+        for (k = 0; k < Math.floor(rnd(4, 9)); k++) { burst(tt, rnd(0.04, 0.12), 'bandpass', 100 + rnd(0, 20), 4, 0.07, 0.003, pan, 0.2); ping(tt, 100, 100, rnd(0.04, 0.1), 0.03, pan, 0.2, 'sawtooth'); tt += rnd(0.05, 0.22); }
+      },
+      distmusic: function (t) {                                        // muffled bass beat and a stretched chord from far away
+        var pan = rnd(-0.8, 0.8), k, f = rnd(90, 130);
+        for (k = 0; k < 6; k++) ping(t + k * 0.48, 70, 42, 0.3, 0.07, pan, 0.8);
+        ping(t, f, f * 1.003, 3.2, 0.018, pan, 0.9, 'triangle'); ping(t, f * 1.5, f * 1.5 * 1.004, 3.2, 0.014, pan, 0.9, 'triangle'); ping(t, f * 1.19, f * 1.19, 3.2, 0.01, pan, 0.9, 'triangle');
+      },
+      dog: function (t) {                                              // a far dog, two or three barks
+        var pan = rnd(-0.9, 0.9), n = Math.floor(rnd(2, 4)), k;
+        for (k = 0; k < n; k++) { ping(t + k * 0.42, 420, 240, 0.16, 0.05, pan, 0.8, 'sawtooth'); burst(t + k * 0.42, 0.14, 'bandpass', 900, 2, 0.04, 0.005, pan, 0.8); }
+      },
+      rollup: function (t) {                                           // a roller shutter hauled up: rattle, then a thud at the top
+        var pan = rnd(-0.7, 0.7), k;
+        for (k = 0; k < 30; k++) burst(t + k * 0.03, 0.04, 'bandpass', rnd(800, 1500) + k * 12, 1.2, 0.04, 0.001, pan, 0.5);
+        burst(t + 0.95, 0.1, 'lowpass', 500, 1, 0.09, 0.002, pan, 0.6); ping(t + 0.95, 120, 80, 0.3, 0.05, pan, 0.6);
+      },
+      broom: function (t) {                                            // somebody sweeping the pavement
+        var pan = rnd(-0.8, 0.8), k, n = Math.floor(rnd(4, 8));
+        for (k = 0; k < n; k++) burst(t + k * 0.55, 0.4, 'bandpass', rnd(2600, 3600), 0.8, 0.035, 0.12, pan, 0.4);
+      },
+      creak: function (t) {                                            // a balcony door swinging on dry hinges
+        var pan = rnd(-0.5, 0.5), f = rnd(180, 260);
+        ping(t, f, f * 1.8, 1.1, 0.03, pan, 0.5, 'sawtooth'); ping(t + 0.1, f * 1.5, f * 2.6, 0.9, 0.015, pan, 0.5, 'square');
+        burst(t, 1.1, 'bandpass', 1200, 3, 0.015, 0.4, pan, 0.4);
+      },
+      compressor: function (t) {                                       // an air-conditioner kicks in: shudder, then a steady drone
+        var pan = rnd(-0.8, 0.8), k;
+        burst(t, 0.25, 'lowpass', 220, 1, 0.08, 0.01, pan, 0.3);
+        ping(t, 60, 100, 4.5, 0.05, pan, 0.4, 'sawtooth'); ping(t + 0.1, 120, 120, 4, 0.02, pan, 0.4, 'square');
+        for (k = 0; k < 8; k++) burst(t + 0.05 + k * 0.04, 0.03, 'bandpass', rnd(300, 700), 2, 0.03, 0.002, pan, 0.3);
+      },
+      siren: function (t) {                                            // a far siren, a long wail that rises and falls
+        var pan = rnd(-0.9, 0.9), k;
+        for (k = 0; k < 3; k++) ping(t + k * 1.6, 620, 900, 1.6, 0.012, pan, 0.9, 'triangle');
+      },
+      frog: function (t) {                                             // a few croaks from the canal
+        var n = Math.floor(rnd(3, 7)), pan = rnd(-0.7, 0.7), f = rnd(140, 190), k;
+        for (k = 0; k < n; k++) ping(t + k * rnd(0.12, 0.17), f, f * 0.7, 0.08, 0.028, pan, 0.5, 'sawtooth');
+      },
+      splash: function (t) {                                           // something small drops into water
+        var pan = rnd(-0.7, 0.7), k;
+        burst(t, 0.35, 'lowpass', 1400, 0.8, 0.07, 0.01, pan, 0.6);
+        for (k = 0; k < 3; k++) ping(t + 0.1 + k * rnd(0.12, 0.25), rnd(900, 1300), 500, 0.12, 0.025, pan, 0.8);
+      },
+      raindrops: function (t) {                                        // rain tapping on glass
+        var n = Math.floor(rnd(14, 25)), pan = rnd(-0.5, 0.5), k;
+        for (k = 0; k < n; k++) { var tt = t + Math.random() * 2.2; burst(tt, 0.02, 'bandpass', 4000, 2, 0.04, 0.001, pan, 0.4); ping(tt, 1800, 900, 0.02, 0.01, pan, 0.4); }
+      },
+      tick: function (t) {                                             // a clock somewhere, slow, tick and tock
+        var pan = rnd(-0.6, 0.6), n = Math.floor(rnd(5, 9)), k;
+        for (k = 0; k < n; k++) { burst(t + k * 0.9, 0.025, 'bandpass', k % 2 ? 1400 : 1900, 3, 0.07, 0.001, pan, 0.6); ping(t + k * 0.9, k % 2 ? 700 : 950, 600, 0.03, 0.02, pan, 0.5); }
+      },
+      breath: function (t) {                                           // something large and slow breathes nearby
+        var d = rnd(3, 4.2), pan = rnd(-0.6, 0.6), src = noiseSrc(t), fl = filt('bandpass', 500, 1.2), g = ctx.createGain();
+        fl.frequency.setValueAtTime(500, t); fl.frequency.linearRampToValueAtTime(900, t + d * 0.45); fl.frequency.linearRampToValueAtTime(420, t + d);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.045, t + d * 0.45); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        src.connect(fl); fl.connect(g); out(g, pan, 0.7); src.stop(t + d + 0.1);
+      },
+      spray: function (t) {                                            // a spray-paint can: shake, then the hiss
+        var pan = rnd(-0.6, 0.6), k, tt = t;
+        for (k = 0; k < 11; k++) { burst(tt, 0.025, 'bandpass', rnd(2200, 3200), 3, 0.05, 0.001, pan, 0.4); tt += 0.07 + Math.random() * 0.03; }
+        burst(tt + 0.1, rnd(0.6, 1.0), 'highpass', 4200, 0.7, 0.05, 0.05, pan, 0.35);
+      },
+      fence: function (t) {                                            // a chain-link fence shaken once
+        var pan = rnd(-0.7, 0.7), k;
+        for (k = 0; k < 18; k++) burst(t + k * 0.02 + Math.random() * 0.02, 0.05, 'highpass', rnd(2800, 4500), 1, 0.06 * Math.exp(-k / 8), 0.001, pan, 0.4);
+        ping(t, 160, 110, 0.4, 0.04, pan, 0.5);
+      },
+      clap: function (t) {                                             // a single clap in an empty alley, long echo
+        var pan = rnd(-0.4, 0.4);
+        burst(t, 0.035, 'highpass', 1400, 0.8, 0.14, 0.001, pan, 1.0); burst(t + 0.11, 0.05, 'bandpass', 900, 1, 0.025, 0.002, pan, 1.0);
+      },
+      shells: function (t) {                                           // a scoop turns over a basket of snail shells
+        var n = Math.floor(rnd(22, 34)), pan = rnd(-0.5, 0.5);
+        for (var k = 0; k < n; k++) burst(t + Math.random() * 1.3, 0.018, 'bandpass', rnd(3000, 6000), 3, rnd(0.015, 0.04), 0.001, pan, 0.35);
+      },
+      scoop: function (t) {                                            // a metal scoop dragged through the market
+        var pan = rnd(-0.6, 0.6), src = noiseSrc(t), fl = filt('bandpass', 1500, 2), g = ctx.createGain();
+        fl.frequency.setValueAtTime(1500, t); fl.frequency.exponentialRampToValueAtTime(3600, t + 0.5);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.12); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+        src.connect(fl); fl.connect(g); out(g, pan, 0.4); src.stop(t + 0.6);
+      },
+      crate: function (t) {                                            // wooden crates knocked together
+        var n = Math.floor(rnd(2, 5)), pan = rnd(-0.7, 0.7), tt = t;
+        for (var k = 0; k < n; k++) { burst(tt, 0.06, 'lowpass', 700, 1, 0.13, 0.002, pan, 0.4); ping(tt, 230, 120, 0.1, 0.07, pan, 0.4); tt += rnd(0.12, 0.34); }
+      },
+      coins: function (t) {                                            // change counted into a hand
+        var n = Math.floor(rnd(8, 14)), pan = rnd(-0.6, 0.6);
+        for (var k = 0; k < n; k++) { var f = rnd(3500, 6200); ping(t + Math.random() * 0.9, f, f * 0.97, 0.07, 0.016, pan, 0.5); }
+      },
+      bikebell: function (t) {                                         // a bicycle bell, shaken
+        var pan = rnd(-0.7, 0.7), v = 0.024;
+        for (var k = 0; k < 8; k++) { ping(t + k * 0.045, 2800 + (k % 2) * 90, 2780, 0.12, v, pan, 0.5); v *= 0.82; }
+      },
+      heels: function (t) {                                            // heels on stone, walking away
+        var n = Math.floor(rnd(6, 10)), pan = rnd(-0.6, 0.6), dp = rnd(-0.1, 0.1), v = rnd(0.07, 0.11), gap = rnd(0.42, 0.56);
+        for (var k = 0; k < n; k++) {
+          var tt = t + k * gap + rnd(-0.02, 0.02);
+          burst(tt, 0.05, 'bandpass', rnd(2200, 3200), 2, v, 0.002, pan, 0.65); ping(tt, 900, 420, 0.04, v * 0.4, pan, 0.5);
+          pan = Math.max(-0.95, Math.min(0.95, pan + dp)); v *= 0.88;
+        }
+      },
+      chime: function (t) {                                            // a shop door chime, inharmonic, not a tune
+        var pan = rnd(-0.7, 0.7), f = rnd(1800, 2600), R = [1, 1.51, 2.38], k;
+        for (k = 0; k < 3; k++) ping(t + k * rnd(0.05, 0.09), f * R[k], f * R[k] * 0.995, 0.55, 0.022, pan, 0.7);
+      },
+      revmurmur: function (t) {                                        // voices played backwards: swell then cut
+        var d = rnd(1.6, 2.6), pan = rnd(-0.7, 0.7), src = noiseSrc(t), a = filt('bandpass', 650, 3), b2 = filt('bandpass', 1800, 4), g = ctx.createGain(), sum = ctx.createGain();
+        lfo(rnd(3, 5), 320, a.frequency); lfo(rnd(2, 4), 560, b2.frequency);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + d * 0.93); g.gain.linearRampToValueAtTime(0.0001, t + d);
+        src.connect(a); src.connect(b2); a.connect(sum); b2.connect(sum); sum.connect(g); out(g, pan, 0.6); src.stop(t + d + 0.1);
+      },
+      bee: function (t) {                                             // a bee passes close: buzz swells and drops
+        var d = rnd(2.6, 4), s = Math.random() < 0.5 ? -1 : 1, o = ctx.createOscillator(), fl = filt('bandpass', 700, 1.2), g = ctx.createGain(), v = ctx.createOscillator(), vg = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.setValueAtTime(rnd(205, 235), t);
+        v.frequency.value = rnd(5, 8); vg.gain.value = 9; v.connect(vg); vg.connect(o.frequency);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.045, t + d * 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+        o.connect(fl); fl.connect(g); var pn = out(g, 0.85 * s, 0.35); if (pn.pan) pn.pan.linearRampToValueAtTime(-0.85 * s, t + d);
+        o.start(t); v.start(t); o.stop(t + d + 0.1); v.stop(t + d + 0.1);
+      },
+      fall: function (t) {                                            // a ripe orange drops on gravel and rolls
+        var pan = rnd(-0.7, 0.7);
+        burst(t, 0.1, 'lowpass', 500, 1, 0.16, 0.003, pan, 0.4); ping(t, 120, 55, 0.14, 0.09, pan, 0.4);
+        var tt = t + 0.18, gap = 0.05;
+        for (var k = 0; k < 14; k++) { burst(tt, 0.03, 'bandpass', rnd(900, 1500), 1.5, 0.035, 0.002, pan, 0.3); tt += gap; gap *= 1.12; }
+      },
+      colorIn: function (t) {                                         // colour switching on: a glassy sweep, no pitch
+        var src = noiseSrc(t), fl = filt('bandpass', 1200, 3), g = ctx.createGain(), pn = out(g, 0, 0.9);
+        fl.frequency.setValueAtTime(1200, t); fl.frequency.exponentialRampToValueAtTime(7200, t + 1.1);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+        src.connect(fl); fl.connect(g); src.stop(t + 1.4);
+      },
+      shutter: function (t) {                                         // the photograph being taken
+        burst(t, 0.012, 'bandpass', 2300, 2, 0.2, 0.001, 0, 0.15); ping(t, 1700, 900, 0.01, 0.05, 0, 0.1);
+        burst(t + 0.075, 0.018, 'lowpass', 1300, 1, 0.14, 0.001, 0, 0.2);
+      }
+    };
+    function build() {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
+      ctx = new AC();
+      var comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
+      N.analyser = ctx.createAnalyser(); N.analyser.fftSize = 1024; comp.connect(N.analyser);
+      N.master = ctx.createGain(); N.master.gain.value = 0; N.master.connect(comp);
+      N.lp = filt('lowpass', 5200, 0.3); N.lp.connect(N.master);
+      N.rev = reverb(); var rg = ctx.createGain(); rg.gain.value = 0.7; N.rev.connect(rg); rg.connect(N.lp);
+      N.dry = ctx.createGain(); N.dry.gain.value = 0.85; N.dry.connect(N.lp);
+      var nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = nb.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; N.noiseBuf = nb;
+      function bed(name, node) { N[name] = ctx.createGain(); N[name].gain.value = 0; node.connect(N[name]); N[name].connect(N.dry); return N[name]; }
+      // cicadas
+      var cb = filt('bandpass', 5400, 2.2), cam = ctx.createGain(); cam.gain.value = 0.5; noiseSrc().connect(cb); cb.connect(cam);
+      lfo(37, 0.5, cam.gain, 'square'); lfo(0.11, 0.25, cam.gain); bed('cic', cam);
+      // crickets
+      var kb = filt('bandpass', 4300, 14), kam = ctx.createGain(); kam.gain.value = 0.5; noiseSrc().connect(kb); kb.connect(kam);
+      lfo(5.6, 0.5, kam.gain, 'square'); lfo(0.17, 0.3, kam.gain); bed('cri', kam);
+      // wind
+      var wl = filt('lowpass', 520), wam = ctx.createGain(); wam.gain.value = 0.6; noiseSrc().connect(wl); wl.connect(wam); lfo(0.07, 0.35, wam.gain); bed('wind', wam);
+      // far-off city: low rumble of traffic plus a little mid hiss
+      var cl = filt('lowpass', 150, 0.7), cg = ctx.createGain(); cg.gain.value = 1; noiseSrc().connect(cl); cl.connect(cg); lfo(0.05, 0.3, cg.gain);
+      var ch = filt('bandpass', 900, 0.6), chg = ctx.createGain(); chg.gain.value = 0.12; noiseSrc().connect(ch); ch.connect(chg); chg.connect(cg); bed('city', cg);
+      // air-conditioner fan: broad noise, no pitch
+      var fb = filt('bandpass', 420, 0.8), fg = ctx.createGain(); fg.gain.value = 1; noiseSrc().connect(fb); fb.connect(fg); lfo(0.13, 0.15, fg.gain); bed('fan', fg);
+      // electric hum of a shop window: 50 Hz and its first harmonics, barely there
+      var hu = ctx.createGain(); hu.gain.value = 1;
+      [50, 100, 150].forEach(function (f, i) { var o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f; var og = ctx.createGain(); og.gain.value = 1 / (i + 1); o.connect(og); og.connect(hu); o.start(); });
+      lfo(0.21, 0.12, hu.gain); bed('hum', hu);
+      // far-off market hubbub: two bands of noise with slow swell, no words
+      var w1 = filt('bandpass', 700, 0.8), w2 = filt('bandpass', 1500, 1.2), wg = ctx.createGain(); wg.gain.value = 0.7;
+      noiseSrc().connect(w1); noiseSrc().connect(w2); w1.connect(wg); w2.connect(wg); lfo(0.31, 0.25, wg.gain); lfo(0.07, 0.2, wg.gain); bed('crowd', wg);
+      // running water: two bands of noise, slowly varying
+      var r1 = filt('bandpass', 1100, 0.6), r2 = filt('bandpass', 2800, 0.8), rg = ctx.createGain(); rg.gain.value = 0.6;
+      noiseSrc().connect(r1); noiseSrc().connect(r2); r1.connect(rg); r2.connect(rg); lfo(0.45, 0.2, rg.gain); lfo(0.13, 0.15, rg.gain); bed('stream', rg);
+      return true;
+    }
+    function setChapter(ci) {
+      var t = ctx.currentTime;
+      N.cic.gain.setTargetAtTime(BED.cic[ci] * 0.05, t, 2.0);
+      N.cri.gain.setTargetAtTime(BED.cri[ci] * 0.045, t, 2.0);
+      N.wind.gain.setTargetAtTime(BED.wind[ci] * 0.16, t, 2.4);
+      N.city.gain.setTargetAtTime(BED.city[ci] * 0.55, t, 2.4);
+      N.fan.gain.setTargetAtTime(BED.fan[ci] * 0.05, t, 2.4);
+      N.stream.gain.setTargetAtTime(BED.stream[ci] * 0.045, t, 2.4);
+      N.crowd.gain.setTargetAtTime(BED.crowd[ci] * 0.05, t, 2.4);
+      N.hum.gain.setTargetAtTime(BED.hum[ci] * 0.012, t, 2.4);
+    }
+    function pickEvent(ci) {
+      var tot = 0, k, w = [];
+      for (k = 0; k < EVN.length; k++) { var x = EV[EVN[k]][ci] * (EVN[k] === lastEv ? 0.15 : 1); w.push(x); tot += x; }
+      var r = Math.random() * tot;
+      for (k = 0; k < EVN.length; k++) { r -= w[k]; if (r <= 0) return EVN[k]; }
+      return EVN[0];
+    }
+    return {
+      get on() { return on; },
+      level: function () {
+        if (!N.analyser) return 0; var d = new Float32Array(N.analyser.fftSize); N.analyser.getFloatTimeDomainData(d);
+        var s = 0, pk = 0; for (var i = 0; i < d.length; i++) { s += d[i] * d[i]; pk = Math.max(pk, Math.abs(d[i])); } return { rms: Math.sqrt(s / d.length), peak: pk };
+      },
+      start: function (ci) {
+        if (!ctx && !build()) return false;
+        ctx.resume(); on = true; lastCi = -1; nextEv = 0;
+        N.master.gain.cancelScheduledValues(ctx.currentTime); N.master.gain.setTargetAtTime(2.1, ctx.currentTime, 1.4);
+        this.update(ci || 0, 0, 0, 0); nextEv = ctx.currentTime + 0.8; return true;
+      },
+      stop: function () {
+        if (!ctx) return; on = false; N.master.gain.cancelScheduledValues(ctx.currentTime);
+        N.master.gain.setTargetAtTime(0, ctx.currentTime, 0.4); var c = ctx; setTimeout(function () { if (!on) c.suspend(); }, 1600);
+      },
+      cue: function (n) { if (on && ctx && E[n]) E[n](ctx.currentTime + 0.05); },
+      pause: function () { if (ctx && on) ctx.suspend(); }, resume: function () { if (ctx && on) ctx.resume(); },
+      update: function (ci, G, vel, T) {
+        if (!on || !ctx) return;
+        if (ci !== lastCi) { lastCi = ci; setChapter(ci); }
+        var t = ctx.currentTime;
+        // when the picture breaks, the sound goes dull and flutters; the shutter fires
+        N.lp.frequency.setTargetAtTime(5200 * (1 - 0.72 * G) + Math.min(1800, vel * 0.5), t, 0.1);
+        N.master.gain.setTargetAtTime(2.1 * (1 - 0.25 * G * Math.abs(Math.sin(T * 17))), t, 0.04);
+        if (G > 0.3 && prevG <= 0.3 && t > lastShot + 2.5) { E.shutter(t + 0.02); lastShot = t; }
+        prevG = G;
+        if (t > nextEv) {
+          if (Math.random() < 0.88) { var e = pickEvent(ci); lastEv = e; E[e](t + 0.03); }
+          nextEv = t + Math.max(0.7, rnd(1.6, 4.6) - G * 1.2);
+        }
+      }
+    };
+  })();
+  var sndBtn = document.getElementById('snd'), curCi = 0;
+  sndBtn.addEventListener('click', function () {
+    if (audio.on) { audio.stop(); sndBtn.setAttribute('aria-pressed', 'false'); sndBtn.textContent = 'Sound: off'; }
+    else if (audio.start(curCi)) { sndBtn.setAttribute('aria-pressed', 'true'); sndBtn.textContent = 'Sound: on'; }
+    else { sndBtn.textContent = 'Sound unavailable'; }
+  });
+  document.addEventListener('visibilitychange', function () { if (document.hidden) audio.pause(); else audio.resume(); });
+  window.dreamAudio = audio.level;
+
+  // credits panel
+  var cred = document.getElementById('credits'), credClose = document.getElementById('credclose'), credLink = document.getElementById('credlink');
+  function openCred() { cred.hidden = false; document.documentElement.classList.add('credopen'); cred.scrollTop = 0; credClose.focus(); }
+  function closeCred() {
+    cred.hidden = true; document.documentElement.classList.remove('credopen');
+    if (location.hash === '#credits') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; } }
+    credLink.focus();
+  }
+  credLink.addEventListener('click', function (e) { e.preventDefault(); openCred(); });
+  credClose.addEventListener('click', closeCred);
+  addEventListener('keydown', function (e) { if (e.key === 'Escape' && !cred.hidden) closeCred(); });
+  if (location.hash === '#credits') openCred();
+  addEventListener('hashchange', function () { if (location.hash === '#credits') openCred(); });
+
+  // grain
+  (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 220;
+    var g = c.getContext('2d'), im = g.createImageData(220, 220);
+    for (var i = 0; i < im.data.length; i += 4) { var v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    g.putImageData(im, 0, 0);
+    document.getElementById('grain').style.backgroundImage = 'url(' + c.toDataURL() + ')';
+  })();
+
+  // ---- scroll geometry -------------------------------------------------------
+  var spacer = document.getElementById('spacer'), vh = innerHeight, vw = innerWidth;
+  function size() {
+    vh = innerHeight; vw = innerWidth;
+    spacer.style.height = Math.round(vh * (1 + (N - 1) * STEP)) + 'px';
+  }
+  size(); addEventListener('resize', size);
+
+  function sm(x) { x = x < 0 ? 0 : x > 1 ? 1 : x; return x * x * (3 - 2 * x); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  // ---- glitch envelope -------------------------------------------------------
+  var burstEnv = 0, burstAmp = 1, burstStart = -1, burstDur = 700, nextBurst = 2200;
+  function triggerBurst(a) { burstStart = performance.now(); burstAmp = a || (0.55 + Math.random() * 0.45); burstDur = 520 + Math.random() * 420; }
+  window.dream = { burst: function () { triggerBurst(1); } };
+
+  var lastBest = 0, lastY = scrollY, lastT = performance.now(), vel = 0, curChap = '';
+  var hint = document.getElementById('hint'), chapname = document.getElementById('chapname');
+  var dot = document.querySelector('#prog i'), prog = document.getElementById('prog');
+
+  function frame(now) {
+    var dt = Math.max(1, now - lastT); lastT = now;
+    var y = scrollY, dy = Math.abs(y - lastY); lastY = y;
+    vel += ((dy / dt * 1000) - vel) * 0.12;
+
+    if (!RM) {
+      if (now > nextBurst && burstStart < 0) { triggerBurst(); nextBurst = now + 3800 + Math.random() * 5200; }
+      if (burstStart >= 0) {
+        var u = (now - burstStart) / burstDur;
+        if (u >= 1) { burstStart = -1; burstEnv = 0; } else { var s = Math.sin(Math.PI * u); burstEnv = s * s * burstAmp; }
+      }
+    }
+    var G = RM ? 0 : Math.max(burstEnv, Math.min(0.75, vel / 4200));
+    var T = now / 1000;
+    var t = y / (vh * STEP);
+
+    var best = 0, bestO = -1;
+    for (var k = 0; k < N; k++) {
+      var b = B[k], d = t - k, ad = Math.abs(d);
+      var o = sm(1 - (ad - 0.15) / 0.7);
+      if (ad < 3.2 && !b.loaded) { b.loaded = true; b.imgs.forEach(function (im) { if (!im.src) im.src = im.dataset.src; }); }
+      if (o <= 0.004) { if (b.vis) { b.node.style.visibility = 'hidden'; b.vis = false; } continue; }
+      if (!b.vis) { b.node.style.visibility = 'visible'; b.vis = true; }
+      b.node.style.opacity = o.toFixed(3);
+      if (b.dim && !b.dimSet && b.main) { b.main.style.filter = 'brightness(' + b.dim + ')'; b.dimSet = 1; }
+      if (b.gs !== undefined) { var gv = Math.max(0, b.gs - G * 1.4); gv = Math.round(gv * 50) / 50; if (gv !== b.gsv) { b.gsv = gv; b.node.style.filter = gv > 0 ? 'grayscale(' + gv + ')' : ''; } }
+      if (o > bestO) { bestO = o; best = k; }
+      var g = G * o;
+      var zoom = RM ? 1.03 : 1.04 + 0.09 * (d + 1) / 2 + 0.01 * Math.sin(T * 0.4 + k);
+      if (b.nz) zoom = 1.0;
+      var ty = RM ? 0 : -d * vh * (b.nz ? 0 : 0.035);
+
+      if (b.t === 'full') {
+        var ptx = 0;
+        if (b.pan) { zoom = b.pan; ty = 0; ptx = RM ? 0 : -d * vw * (b.pan - 1) * 0.5; }
+        b.main.style.transform = 'translate3d(' + (g * 5 + ptx) + 'px,' + ty + 'px,0) scale(' + zoom + ')';
+        b.gh.style.opacity = (g * 0.42).toFixed(3);
+        b.gh.style.transform = 'translate3d(' + (g * 26 * (hash(k) > .5 ? 1 : -1) + ptx) + 'px,' + (ty + g * 6) + 'px,0) scale(' + (zoom + g * 0.03) + ')';
+      } else if (b.t === 'frame') {
+        var a0 = b.ar[0], a1 = b.ar[1];
+        var ar = lerp(a0, a1, sm((d + 0.8) / 1.6)) + g * 0.22 * Math.sin(T * 9 + k);
+        var maxW = Math.min(vw * 0.84, 1180), maxH = vh * 0.76;
+        var w = Math.min(maxW, maxH * ar), h = w / ar;
+        b.fr.style.width = w + 'px'; b.fr.style.height = h + 'px';
+        b.fr.style.transform = 'translate(-50%,-50%) translate3d(' + (d * -vw * 0.03 + g * 10) + 'px,0,0)';
+        b.main.style.transform = 'scale(' + (RM ? 1.02 : 1.05 + 0.06 * (d + 1) / 2) + ')';
+        b.bgi.style.transform = 'scale(1.25) translate3d(0,' + ty + 'px,0)';
+        b.gh.style.opacity = (g * 0.4).toFixed(3);
+        b.gh.style.transform = 'translate3d(' + (g * 22) + 'px,0,0) scale(1.04)';
+      } else if (b.t === 'double') {
+        b.main.style.transform = 'translate3d(0,' + ty + 'px,0) scale(' + zoom + ')';
+        var dr = RM ? 0 : (d * vw * 0.06) + Math.sin(T * 0.5 + k) * vw * 0.012 + g * 30;
+        b.two.style.opacity = (0.5 + 0.22 * Math.sin(T * 0.7 + k) + g * 0.2).toFixed(3);
+        b.two.style.transform = 'translate3d(' + (-dr) + 'px,' + (-ty * 0.6) + 'px,0) scale(' + (1.1 + g * 0.04) + ')';
+      } else if (b.t === 'mix') {
+        b.main.style.transform = 'translate3d(' + (g * 5) + 'px,' + ty + 'px,0) scale(' + zoom + ')';
+        var mx = (b.mxc !== undefined ? b.mxc : 50) + 32 * Math.sin(d * 1.3 + k) + 6 * Math.sin(T * 0.35 + k * 2);
+        var my = 50 + 26 * Math.cos(d * 1.1 + k * 1.7) + 5 * Math.cos(T * 0.3 + k);
+        var mr = (b.mrb || 75) + 22 * Math.sin(d * 0.9 + k) + g * 40;
+        b.mw.style.setProperty('--mx', mx + '%'); b.mw.style.setProperty('--my', my + '%'); b.mw.style.setProperty('--mr', mr + '%');
+        if (b.slat) {
+          if (!b.slatSet) { b.slatSet = 1; var sg = 'repeating-linear-gradient(' + (b.slat[2] === undefined ? 90 : b.slat[2]) + 'deg, #000 0, #000 ' + b.slat[0] + 'px, transparent ' + b.slat[0] + 'px, transparent ' + (b.slat[0] + b.slat[1]) + 'px)'; b.mw.style.webkitMaskImage = sg; b.mw.style.maskImage = sg; b.mw.style.webkitMaskSize = 'auto'; b.mw.style.maskSize = 'auto'; }
+          var hz = b.slat[2] === 0 || b.slat[2] === 180, sv = hz ? (-d * vh * 0.4 + Math.sin(T * 0.3 + k) * 24 + g * 50) : (-d * vw * 0.35 + Math.sin(T * 0.3 + k) * 30 + g * 60), so = hz ? '0 ' + sv + 'px' : sv + 'px 0';
+          b.mw.style.webkitMaskPosition = so; b.mw.style.maskPosition = so;
+        }
+        b.mw.style.opacity = Math.min(1, (b.mop || 0.7) + (b.mop >= 0.9 ? 0 : 0.18 * Math.sin(T * 0.5 + k)) + g * 0.15).toFixed(3);
+        if (b.xf) {
+          if (!b.xfSet) { b.xfSet = 1; b.mw.style.webkitMaskImage = 'none'; b.mw.style.maskImage = 'none'; }
+          var xu = Math.min(1, Math.max(0, (d + 0.32) / 0.64)); xu = xu * xu * (3 - 2 * xu);
+          b.mw.style.opacity = Math.min(1, xu + g * 0.2 * (1 - xu)).toFixed(3);
+        }
+        b.mo.style.transform = 'translate3d(' + (-d * vw * 0.05 + g * 24) + 'px,' + (-ty * 0.5) + 'px,0) scale(' + (1.1 + g * 0.04) + ')';
+      } else if (b.t === 'tri') {
+        var ws = [], tot = 0;
+        for (var c2 = 0; c2 < 3; c2++) { var wv = 1 + 0.5 * Math.sin(d * (1.2 + c2 * 0.3) + k + c2 * 2) * (RM ? 0 : 0.35 + g); ws.push(wv); tot += wv; }
+        var lf = 0;
+        for (var c3 = 0; c3 < 3; c3++) {
+          var wp = ws[c3] / tot * 100;
+          b.cols[c3].style.left = lf + '%'; b.cols[c3].style.width = (wp + 0.15) + '%'; lf += wp;
+          b.cimgs[c3].style.transform = 'translate3d(0,' + ((c3 % 2 ? 1 : -1) * d * vh * (RM ? 0 : 0.09) * (b.tdrift ? b.tdrift[c3] : 1)) + 'px,0) scale(' + (b.tscale ? b.tscale[c3] : 1.22) + ')';
+        }
+      } else if (b.t === 'slices') {
+        var amp = vw * (RM ? 0 : (0.006 + 0.08 * g));
+        for (var s2 = 0; s2 < b.sls.length; s2++) {
+          var n = (hash(s2 + k * 9) - 0.5) * 2;
+          b.sls[s2].style.transform = 'translate3d(' + (n * amp + Math.sin(T * 0.6 + s2) * vw * 0.004) + 'px,0,0)';
+        }
+      } else if (b.t === 'chap' || b.t === 'end') {
+        var ca = g * 14;
+        b.big.style.transform = 'translateY(-54%) translate3d(' + (d * -vw * 0.12) + 'px,0,0)';
+        b.big.style.textShadow = (ca) + 'px 0 rgba(208,101,60,.55),' + (-ca) + 'px 0 rgba(95,167,196,.5),0 0 60px rgba(0,0,0,.6)';
+        b.big.style.letterSpacing = (g * 0.05 + 0.01) + 'em';
+        b.big.style.opacity = (1 - 0.35 * g * Math.abs(Math.sin(T * 30))).toFixed(2);
+      }
+
+      if (b.txt) {
+        var sh = RM ? 0 : d * vw * 0.07;
+        b.txt.style.transform = (b.pos === 'p-c' ? 'translate(-50%,-50%) ' : '') + 'translate3d(' + (sh + g * 14) + 'px,' + (g * -4) + 'px,0)';
+        var el0 = b.txt.firstChild;
+        el0.style.textShadow = g > 0.03
+          ? (g * 7) + 'px 0 rgba(208,101,60,.6),' + (-g * 7) + 'px 0 rgba(95,167,196,.55),0 2px 36px rgba(0,0,0,.7)' : '';
+        for (var w2 = 0; w2 < b.words.length; w2++) {
+          var wy = RM ? 0 : Math.sin(T * 1.1 + w2 * 0.9) * 1.2 + g * 16 * Math.sin(T * 7 + w2 * 2.3) * (hash(w2 + 3 + k) + 0.3);
+          b.words[w2].style.transform = 'translate3d(' + (g * 10 * (hash(w2 + k) - 0.5)) + 'px,' + wy + 'px,0)';
+        }
+      }
+    }
+    // chapter label
+    if (best !== lastBest) { var pg = B[lastBest].gs, ng = B[best].gs; if (pg !== undefined && ng !== undefined && ng < pg - 0.12 && !RM) audio.cue('colorIn'); lastBest = best; }
+    curCi = B[best].prof; audio.update(B[best].prof, G, vel, T);
+    var cb = B[best], nm = '';
+    for (var q = best; q >= 0; q--) { if (B[q].chap) { nm = B[q].chap; break; } }
+    if (nm !== curChap) { curChap = nm; chapname.textContent = nm; }
+    hint.classList.toggle('off', y > 40);
+    var pr = Math.min(1, y / Math.max(1, document.documentElement.scrollHeight - vh));
+    dot.style.top = (pr * (prog.clientHeight - 3)) + 'px';
+    document.getElementById('grain').style.transform = 'translate(' + ((Math.floor(now / 90) % 7) * -8) + 'px,' + ((Math.floor(now / 90) % 5) * -9) + 'px)';
+    requestAnimationFrame(frame);
+  }
+  // prefetch first beats immediately
+  requestAnimationFrame(frame);
+})();
+</script>
