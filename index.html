@@ -228,7 +228,7 @@ html.credopen { overflow: hidden; }
   var PROF = [15];
   // ---- sound: a synthesised street at five times of day (no melody) ----------------
   var audio = (function () {
-    var ctx = null, on = false, N = {}, lastCi = -1, nextEv = 0, lastEv = '', prevG = 0, lastShot = 0;
+    var ctx = null, on = false, N = {}, lastCi = -1, nextEv = 0, nextBab = 0, lastEv = '', prevG = 0, lastShot = 0;
     // chapter order: intro, midday, shadows, dusk, night, dawn
     var BED = { stream: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0], crowd: [0, 0, 0, 0, 0, 0, 0, 0, .8, 0, 0, 0, 0.2, 0.1, 0.15, 0, 0.12], babble: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0.22, 0.1, 0.12, 0, 0.1], hum: [0, 0, 0, 0, 0, 0, 0, .7, 0, 0, 0, 0, 0, 0.4, 0, 0, 0.12], cic: [0, .9, .3, .12, 0, 0, 0.3, 0, 0.3, 0.15, 0.1, 0.1, 0.2, 0, 0.1, 0.2, 1], cri: [0, 0, 0, .35, .9, .3, 0, 0.15, 0, 0, 0.1, 0.4, 0.3, 0.7, 0.1, 0, 0], wind: [.15, .2, .5, .3, .3, .4, 0.55, 0.2, 0.1, 0.5, 0.55, 0.3, 0.3, 0.15, 0.3, 0.3, 0.1],
                 city: [.5, .7, .4, .45, .35, .3, 0.12, 0.55, 0.4, 0.3, 0.22, 0.15, 0.5, 0.3, 0.25, 0.2, 0.35], fan: [.15, .3, .1, .1, .25, .05, 0, 0.3, 0, 0.1, 0.1, 0, 0.15, 0.12, 0.1, 0.18, 0.2] };
@@ -278,6 +278,27 @@ html.credopen { overflow: hidden; }
       bell:      [0, 0, 0, .15, 0, .15, 0, 0, 0, 0.35, 0.2, 0, 0.6, 0.2, 0.5, 0.35, 0.2]
     };
     var EVN = Object.keys(EV);
+    // a few seconds of someone talking, far off: syllables with real vowel formants, uneven rhythm, falling pitch, small consonant puffs
+    var VOW = [[800, 1250], [520, 1850], [330, 2250], [520, 950], [360, 800]];   // a e i o u
+    function phrase(t, lvl) {
+      var male = Math.random() < 0.55, f0 = male ? rnd(98, 135) : rnd(185, 250), n = Math.floor(rnd(4, 10)), pan = rnd(-0.85, 0.85);
+      var o = ctx.createOscillator(), f1 = filt('bandpass', 600, 6), f2 = filt('bandpass', 1500, 8), f3 = filt('bandpass', 2700, 6), lp = filt('lowpass', 3200, 0.5);
+      var g1 = ctx.createGain(), g2 = ctx.createGain(), g3 = ctx.createGain(), env = ctx.createGain(), sum = ctx.createGain();
+      g1.gain.value = 1; g2.gain.value = 0.7; g3.gain.value = 0.25; o.type = 'sawtooth'; o.frequency.value = f0;
+      o.connect(f1); o.connect(f2); o.connect(f3); f1.connect(g1); f2.connect(g2); f3.connect(g3); g1.connect(sum); g2.connect(sum); g3.connect(sum); sum.connect(env); env.connect(lp);
+      var tt = t, v, d, pk;
+      env.gain.setValueAtTime(0.0001, t);
+      for (var i = 0; i < n; i++) {
+        v = VOW[Math.floor(Math.random() * VOW.length)]; d = rnd(0.09, 0.22); pk = lvl * rnd(0.6, 1);
+        f1.frequency.setTargetAtTime(v[0] * rnd(0.92, 1.08), tt, 0.025); f2.frequency.setTargetAtTime(v[1] * rnd(0.92, 1.08), tt, 0.025);
+        o.frequency.setTargetAtTime(f0 * (1.12 - 0.3 * i / n + rnd(-0.05, 0.09)), tt, 0.03);
+        env.gain.setTargetAtTime(pk, tt, 0.018); env.gain.setTargetAtTime(pk * 0.12, tt + d * 0.7, 0.03);
+        if (Math.random() < 0.6) burst(tt, 0.03, 'bandpass', rnd(1800, 4800), 1, lvl * 0.35, 0.004, pan, 0.5);
+        tt += d + (Math.random() < 0.12 ? rnd(0.3, 0.7) : rnd(0.02, 0.1));
+      }
+      env.gain.setTargetAtTime(0.0001, tt, 0.05);
+      var dest = out(lp, pan, 0.7); o.start(t); o.stop(tt + 0.4);
+    }
     var EXTRA = ['colorIn'];
     function rnd(a, b) { return a + Math.random() * (b - a); }
     function noiseSrc(t) {
@@ -577,18 +598,6 @@ html.credopen { overflow: hidden; }
       // far-off market hubbub: two bands of noise with slow swell, no words
       var w1 = filt('bandpass', 700, 0.8), w2 = filt('bandpass', 1500, 1.2), wg = ctx.createGain(); wg.gain.value = 0.7;
       noiseSrc().connect(w1); noiseSrc().connect(w2); w1.connect(wg); w2.connect(wg); lfo(0.31, 0.25, wg.gain); lfo(0.07, 0.2, wg.gain); bed('crowd', wg);
-      // the babble of a market: several voices without words (a pitched buzz through moving vowel formants, switched on and off at syllable rate)
-      var bb = ctx.createGain(); bb.gain.value = 1;
-      for (var vi = 0; vi < 7; vi++) {
-        var vo = ctx.createOscillator(); vo.type = 'sawtooth'; vo.frequency.value = (vi % 3 === 0) ? rnd(95, 130) : rnd(170, 240); lfo(rnd(0.3, 0.8), 5, vo.frequency); vo.start();
-        var vf1 = filt('bandpass', rnd(520, 700), 5), vf2 = filt('bandpass', rnd(1300, 1800), 7), vg = ctx.createGain(); vg.gain.value = 0.3;
-        lfo(rnd(3, 5), 220, vf1.frequency); lfo(rnd(2.5, 4), 450, vf2.frequency); lfo(rnd(3, 5.5), 0.17, vg.gain); lfo(rnd(0.2, 0.5), 0.1, vg.gain);
-        vo.connect(vf1); vo.connect(vf2); vf1.connect(vg); vf2.connect(vg);
-        var vp = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (vp.pan) vp.pan.value = rnd(-0.8, 0.8);
-        vg.connect(vp); vp.connect(bb);
-      }
-      var sh = filt('highpass', 3500, 0.7), shg = ctx.createGain(); shg.gain.value = 0.05; noiseSrc().connect(sh); sh.connect(shg); lfo(4.1, 0.04, shg.gain); shg.connect(bb);
-      bed('babble', bb);
       // running water: two bands of noise, slowly varying
       var r1 = filt('bandpass', 1100, 0.6), r2 = filt('bandpass', 2800, 0.8), rg = ctx.createGain(); rg.gain.value = 0.6;
       noiseSrc().connect(r1); noiseSrc().connect(r2); r1.connect(rg); r2.connect(rg); lfo(0.45, 0.2, rg.gain); lfo(0.13, 0.15, rg.gain); bed('stream', rg);
@@ -603,7 +612,6 @@ html.credopen { overflow: hidden; }
       N.fan.gain.setTargetAtTime(BED.fan[ci] * 0.05, t, 2.4);
       N.stream.gain.setTargetAtTime(BED.stream[ci] * 0.045, t, 2.4);
       N.crowd.gain.setTargetAtTime(BED.crowd[ci] * 0.05, t, 2.4);
-      N.babble.gain.setTargetAtTime(BED.babble[ci] * 0.17, t, 2.4);
       N.hum.gain.setTargetAtTime(BED.hum[ci] * 0.012, t, 2.4);
     }
     function pickEvent(ci) {
@@ -621,7 +629,7 @@ html.credopen { overflow: hidden; }
       },
       start: function (ci) {
         if (!ctx && !build()) return false;
-        ctx.resume(); on = true; lastCi = -1; nextEv = 0;
+        ctx.resume(); on = true; lastCi = -1; nextEv = 0; nextBab = 0;
         N.master.gain.cancelScheduledValues(ctx.currentTime); N.master.gain.setTargetAtTime(2.1, ctx.currentTime, 1.4);
         this.update(ci || 0, 0, 0, 0); nextEv = ctx.currentTime + 0.8; return true;
       },
@@ -643,6 +651,10 @@ html.credopen { overflow: hidden; }
         if (t > nextEv) {
           if (Math.random() < 0.88) { var e = pickEvent(ci); lastEv = e; E[e](t + 0.03); }
           nextEv = t + Math.max(0.7, rnd(1.6, 4.6) - G * 1.2);
+        }
+        if (BED.babble[ci] > 0.05 && t > nextBab) {
+          phrase(t + 0.05, 0.22 * (0.35 + 0.65 * BED.babble[ci]));
+          nextBab = t + rnd(0.5, 1.4) / Math.max(0.2, BED.babble[ci]);
         }
       }
     };
